@@ -1,67 +1,74 @@
 # Atlas 开发团队
 
+> 更新：2026-03-11
+
 ## 团队架构
 
 ```
-┌─────────────────────────────────────┐
-│         Product Manager             │
-│         Nomi (糯米)                 │
-│   项目规划 · 需求管理 · 对外协调     │
-└─────────────────────────────────────┘
-                    │
-        ┌───────────┼───────────┐
-        ▼           ▼           ▼
-┌───────────┐ ┌───────────┐ ┌───────────┐
-│  Tech     │ │  Frontend │ │  Backend  │
-│  Lead     │ │  Dev     │ │  Dev     │
-│  Codex    │ │ Claude    │ │  coding  │
-│           │ │  Code     │ │  agent   │
-└───────────┘ └───────────┘ └───────────┘
+                    ┌─────────────────┐
+                    │  Product Owner  │
+                    │     Nomi        │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│  Tech Lead    │   │  Frontend    │   │  Backend     │
+│  codex        │   │  claude-code  │   │  coding-agent │
+└───────────────────┘   └───────────────┘
+       ───┘   └──────── │                    │                    │
+        └────────────────────┼────────────────────┘
+                             │
+                             ▼
+                    ┌───────────────┐
+                    │      QA       │
+                    │   test-agent  │
+                    └───────────────┘
 ```
 
 ## 角色职责
 
-| 角色 | Agent | 职责 |
-|------|-------|------|
-| Product Manager | Nomi | 需求分析、Sprint规划、进度管理 |
-| Tech Lead | Codex | 架构设计、技术方案、代码审查 |
-| Frontend Dev | Claude Code | Vue3前端开发、组件编写 |
-| Backend Dev | 编码Agent | Node.js后端、API开发 |
-| DevOps | Nomi | 部署、CI/CD、代码提交 |
+| 角色 | Agent ID | 职责 |
+|------|----------|------|
+| Product Owner | Nomi (主会话) | 需求管理、Sprint规划、进度汇报 |
+| Tech Lead | codex（Colter） | 架构设计、技术方案、代码审查 |
+| Frontend Dev | claude-code（Cock） | Vue3前端开发、组件编写 |
+| Backend Dev | coding-agent（Peter） | Node.js后端、API开发 |
+| QA | test-agent（Andy） | 测试、Bug查找 |
 
 ## 协作规范
 
-### 1. Sprint 流程
-
+### Sprint 流程
 ```
-Sprint Planning → Daily Standup → Development → Code Review → Test → Deploy → Retrospective
+Sprint Planning → 每日站会 → 开发 → Code Review → 测试 → 部署 → 回顾
 ```
 
-### 2. 代码管理
+### 代码管理
+- 主干：`main` 分支
+- 功能分支：`feature/功能名`
+- 提交规范：`[feat/fix/docs] description`
 
-- **主干开发**：`main` 分支
-- **功能分支**：`feature/功能名`
-- **提交规范**：`[type] description`（feat/fix/docs）
+### 每日站会格式
+```
+[日期] Sprint X Day Y
 
-### 3. 每日站会
+✅ 昨天完成：
+- [任务]
 
-- 每人汇报：昨天完成 / 今天计划 / 阻塞问题
+📋 今天计划：
+- [任务]
 
-### 4. Definition of Done
+🚧 阻塞问题：
+- [无/问题描述]
+```
 
-- [ ] 代码编写完成
-- [ ] 通过 Code Review
-- [ ] 本地测试通过
+### Definition of Done
+- [ ] 代码完成
+- [ ] Code Review 通过
+- [ ] QA 测试通过
 - [ ] 提交到 GitHub
 
 ---
 
-## 沟通方式
-
-- 所有讨论在当前会话进行
-- 重要决策同步到 `projects/atlas/docs/decisions/`
-- 遇到阻塞立即升级给 PM
-
----
-
-*团队组建完成，准备开工*
+*Atlas团队 v1.0*
