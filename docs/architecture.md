@@ -79,7 +79,7 @@
    店长选择门店、日期、班次、员工 → 后端校验人数上下限、重复排班、请假冲突、新员工首周等规则 → 若命中例外规则则进入审批 → 否则直接发布。
 
 3. **请假同步链路**  
-   系统通过企微审批回调或定时拉取，获取“已审批通过”的请假单 → 映射到本地 leave_record → 反向影响排班校验与展示。
+   系统通过企微审批回调或定时拉取，获取“请假审批实例”的最新状态 → 幂等落库到本地 `leave_records` → 反向影响排班校验与展示。
 
 ### 2.4 架构原则
 
@@ -380,7 +380,7 @@ MVP 阶段 **不建议** 在 Atlas 内再做一套独立请假审批流；员工
 ```text
 企微审批单状态变更（通过）
     ↓
-企微回调 Atlas /api/wework/callback/approval
+企微回调 Atlas /api/leaves/wework/callback
     ↓
 后端验签、解密、解析审批实例
     ↓
@@ -451,8 +451,7 @@ MVP 建议只做 3 个通知：
 - `name`
 - `mobile`
 - `wework_user_id`（唯一）
-- `role`（employee / manager / operation）
-- `store_id`
+- `role`（employee / manager / operation_manager / admin）
 - `status`
 - `joined_at`
 - `is_new_staff`（可派生，也可不存）
@@ -483,7 +482,50 @@ MVP 建议只做 3 个通知：
 
 - `brand_type` 决定默认人数上下限规则。
 
-### 6.3 shifts 班次模板表
+### 6.3 store_staffs 门店员工关系表
+
+用途：表示用户与门店的任职关系，支持调店、多店兼职、历史归属追踪。
+
+关键字段：
+
+- `id`
+- `store_id`
+- `user_id`
+- `job_title`
+- `is_primary`
+- `status`
+- `joined_at`
+- `left_at`
+- `created_at` / `updated_at`
+
+说明：
+
+- 门店归属不要直接固化在 `users.store_id`；
+- 当前主门店通过 `is_primary=1 and status=active` 判断；
+- 该表同时服务排班可选员工、请假归属门店、权限过滤。
+
+### 6.4 store_rules 门店规则表
+
+用途：保存门店默认人数上下限、新员工保护期、是否允许例外审批等规则。
+
+关键字段：
+
+- `id`
+- `store_id`
+- `default_min_staff`
+- `default_max_staff`
+- `new_staff_protection_days`
+- `allow_understaff_with_approval`
+- `allow_overstaff_with_approval`
+- `special_rules_json`
+- `created_at` / `updated_at`
+
+说明：
+
+- 规则不要硬编码在前端或 service 常量里；
+- 班次级人数规则优先读取 `shift_templates`，门店级规则作为默认值与兜底。
+
+### 6.5 shift_templates 班次模板表
 
 用途：定义各门店班次模板。
 
@@ -503,35 +545,9 @@ MVP 建议只做 3 个通知：
 
 - 人数上限下限建议放到班次级，而不是只放门店级，后续更灵活。
 
-### 6.4 schedules 排班主表
+### 6.6 schedule_batches 排班批次表
 
-用途：存储具体某员工某天某班次的排班记录。
-
-关键字段：
-
-- `id`
-- `store_id`
-- `user_id`
-- `shift_id`
-- `schedule_date`
-- `start_time`
-- `end_time`
-- `status`（draft / pending_approval / approved / published / cancelled）
-- `source`（manual / imported / adjusted）
-- `created_by`
-- `published_at`
-- `remark`
-- `created_at` / `updated_at`
-
-关键索引：
-
-- `(store_id, schedule_date)`
-- `(user_id, schedule_date)`
-- `(user_id, schedule_date, shift_id)`
-
-### 6.5 schedule_batches 排班批次表
-
-用途：一周排班通常是批量生成，建议单独建批次表方便草稿/发布/回滚。
+用途：一周排班通常是批量生成，建议单独建批次表方便草稿/审批/发布/回滚。
 
 关键字段：
 
@@ -539,17 +555,57 @@ MVP 建议只做 3 个通知：
 - `store_id`
 - `week_start_date`
 - `week_end_date`
-- `status`（draft / pending_approval / published）
+- `status`（draft / pending_approval / approved / published / cancelled）
+- `version`
+- `validation_status`
+- `requires_approval`
 - `created_by`
+- `submitted_by`
+- `submitted_at`
 - `published_by`
 - `published_at`
 - `created_at` / `updated_at`
 
 说明：
 
-- `schedules.batch_id` 关联此表，便于按周管理。
+- 同一门店同一周允许多版本并存，使用 `(store_id, week_start_date, version)` 保证唯一；
+- 批次是创建、校验、审批、发布的统一聚合根。
 
-### 6.6 leave_records 请假记录表
+### 6.7 schedule_entries 排班明细表
+
+用途：存储具体某员工某天某班次的排班记录。
+
+关键字段：
+
+- `id`
+- `batch_id`
+- `store_id`
+- `user_id`
+- `shift_template_id`
+- `schedule_date`
+- `start_at`
+- `end_at`
+- `status`（draft / pending_approval / approved / published / cancelled）
+- `source`（manual / copied / adjusted / system_generated）
+- `exception_flags_json`
+- `remark`
+- `created_by`
+- `updated_by`
+- `created_at` / `updated_at`
+
+关键索引：
+
+- `(store_id, schedule_date)`
+- `(user_id, schedule_date)`
+- `(batch_id)`
+- `(shift_template_id, schedule_date)`
+
+说明：
+
+- 直接落 `start_at/end_at`，不要每次依赖模板动态拼时间；
+- `exception_flags_json` 用于沉淀规则命中结果，服务审批与审计。
+
+### 6.8 leave_records 请假记录表
 
 用途：企微请假审批同步后的本地事实表。
 
@@ -577,7 +633,7 @@ MVP 建议只做 3 个通知：
 - `(user_id, start_time, end_time)`
 - `(store_id, start_time, end_time)`
 
-### 6.7 approval_requests 特殊排班审批表
+### 6.9 approval_requests 特殊排班审批表
 
 用途：承接系统内“特殊排班审批”，不是企微请假审批。
 
@@ -599,7 +655,26 @@ MVP 建议只做 3 个通知：
 
 - MVP 只做一级审批即可：店长提交 → 运营经理审批。
 
-### 6.8 swap_requests 换班申请表（P1）
+### 6.10 approval_actions 审批动作流水表
+
+用途：记录审批过程动作，支撑审计与详情页展示。
+
+关键字段：
+
+- `id`
+- `approval_request_id`
+- `action`（submit / approve / reject / cancel）
+- `actor_user_id`
+- `comment`
+- `snapshot_json`
+- `created_at`
+
+说明：
+
+- 审批主表保存当前态，动作历史单独留痕；
+- 这张表对排查“谁在什么时候审批了什么”是刚需。
+
+### 6.11 wework_sync_logs 同步日志表
 
 用途：员工换班申请，P1 再完整启用。
 
@@ -614,7 +689,6 @@ MVP 建议只做 3 个通知：
 - `reason`
 - `created_at` / `updated_at`
 
-### 6.9 wework_sync_logs 同步日志表
 
 用途：排查回调与定时同步问题，强烈建议建。
 
@@ -629,17 +703,51 @@ MVP 建议只做 3 个通知：
 - `error_message`
 - `created_at`
 
-### 6.10 实体关系概览
+### 6.12 wework_approval_sync_cursor 同步游标表
+
+用途：保存企微审批补偿拉取进度，支撑“回调为主、定时补偿为辅”。
+
+关键字段：
+
+- `id`
+- `sync_type`
+- `cursor_key`
+- `last_success_time`
+- `last_success_cursor`
+- `last_run_status`
+- `last_error_message`
+- `updated_at`
+- `created_at`
+
+### 6.13 swap_requests 换班申请表（P1）
+
+用途：员工换班申请，P1 再完整启用。
+
+关键字段：
+
+- `id`
+- `from_user_id`
+- `to_user_id`
+- `from_schedule_entry_id`
+- `target_schedule_entry_id`
+- `status`
+- `reason`
+- `created_at` / `updated_at`
+
+### 6.14 实体关系概览
 
 ```text
-stores 1 ─── n users
-stores 1 ─── n shifts
+users 1 ─── n store_staffs n ─── 1 stores
+stores 1 ─── 1 store_rules
+stores 1 ─── n shift_templates
 stores 1 ─── n schedule_batches
-schedule_batches 1 ─── n schedules
-users 1 ─── n schedules
+schedule_batches 1 ─── n schedule_entries
+users 1 ─── n schedule_entries
 users 1 ─── n leave_records
-users 1 ─── n approval_requests
+stores 1 ─── n leave_records
 stores 1 ─── n approval_requests
+schedule_batches 1 ─── n approval_requests
+approval_requests 1 ─── n approval_actions
 ```
 
 ---
@@ -726,8 +834,8 @@ stores 1 ─── n approval_requests
 ### 8.4 请假接口
 
 - `GET /api/leaves?storeId=&start=&end=`
-- `POST /api/wework/leave-sync/manual`（仅管理后台/调试）
-- `POST /api/wework/callback/approval`
+- `POST /api/leaves/sync/manual`（仅管理后台/调试）
+- `POST /api/leaves/wework/callback`
 
 ### 8.5 审批接口
 
@@ -841,7 +949,7 @@ stores 1 ─── n approval_requests
 #### 后端
 
 1. 初始化 Express + TS + ORM + 基础中间件
-2. 建 users / stores / shifts / schedules / leave_records / approval_requests 表
+2. 建 `users / stores / store_staffs / store_rules / shift_templates / schedule_batches / schedule_entries / leave_records / approval_requests / approval_actions / wework_sync_logs` 表
 3. 打通 `auth/wework/callback`
 4. 完成 `GET /auth/me`、`GET /stores`、`GET /stores/:id/shifts`
 5. 预留企微回调入口与同步日志表

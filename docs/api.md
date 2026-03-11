@@ -163,6 +163,7 @@ Authorization: Bearer <access_token>
 |---|---|
 | `draft` | 草稿 |
 | `pending_approval` | 待审批 |
+| `approved` | 审批通过待发布 |
 | `published` | 已发布 |
 | `cancelled` | 已取消 |
 
@@ -171,7 +172,8 @@ Authorization: Bearer <access_token>
 | 值 | 说明 |
 |---|---|
 | `approved` | 已审批通过 |
-| `cancelled` | 已撤销/失效 |
+| `revoked` | 已撤销 |
+| `partially_revoked` | 部分撤销 |
 
 ### 3.6 审批状态
 
@@ -189,10 +191,11 @@ Authorization: Bearer <access_token>
 | `UNDER_MIN_STAFF` | 低于最小在店人数 |
 | `OVER_MAX_STAFF` | 高于满编人数 |
 | `LEAVE_CONFLICT` | 与请假冲突 |
-| `NON_VOLUNTARY_SHIFT_CHANGE` | 临时调班（非自愿） |
-| `OVERTIME_OR_REDUCED_SHIFT` | 加班/减少班次 |
-| `NEW_EMPLOYEE_FIRST_WEEK` | 新员工首周排班 |
-| `PROMOTION_SPECIAL_ARRANGEMENT` | 促销/旺季特殊安排 |
+| `FORCED_TRANSFER` | 临时调班（非自愿） |
+| `OVERTIME_REQUIRED` | 加班要求 |
+| `SHIFT_REDUCTION` | 减少班次 |
+| `NEW_STAFF_FIRST_WEEK` | 新员工首周排班 |
+| `PROMOTION_SEASON_SPECIAL` | 促销/旺季特殊安排 |
 
 ---
 
@@ -211,7 +214,7 @@ Authorization: Bearer <access_token>
 | schedules | `GET /api/schedules/batches/:id` | 查询排班批次详情 |
 | schedules | `POST /api/schedules/batches/:id/validate` | 校验排班规则 |
 | leaves | `GET /api/leaves` | 查询请假记录 |
-| approvals | `POST /api/approvals` | 创建特殊排班审批 |
+| approvals | `POST /api/approvals` | 创建特殊排班审批（通常由提交排班审批接口内部调用） |
 | approvals | `GET /api/approvals/:id` | 查询审批详情 |
 
 ### 4.2 MVP 必需接口
@@ -745,7 +748,7 @@ Authorization: Bearer <access_token>
         "message": "早班排班人数低于最小值 3"
       },
       {
-        "type": "NEW_EMPLOYEE_FIRST_WEEK",
+        "type": "NEW_STAFF_FIRST_WEEK",
         "level": "warning",
         "scheduleDate": "2026-03-16",
         "employeeId": 101,
@@ -780,7 +783,7 @@ Authorization: Bearer <access_token>
 {
   "triggerReasons": [
     "UNDER_MIN_STAFF",
-    "NEW_EMPLOYEE_FIRST_WEEK"
+    "NEW_STAFF_FIRST_WEEK"
   ],
   "comment": "周一早班临时缺人，申请例外发布"
 }
@@ -1074,7 +1077,7 @@ Authorization: Bearer <access_token>
   "scheduleBatchId": 10001,
   "triggerReasons": [
     "UNDER_MIN_STAFF",
-    "NEW_EMPLOYEE_FIRST_WEEK"
+    "NEW_STAFF_FIRST_WEEK"
   ],
   "comment": "周一早班临时缺人，申请审批"
 }
@@ -1168,7 +1171,7 @@ Authorization: Bearer <access_token>
     "status": "pending",
     "triggerReasons": [
       "UNDER_MIN_STAFF",
-      "NEW_EMPLOYEE_FIRST_WEEK"
+      "NEW_STAFF_FIRST_WEEK"
     ],
     "comment": "周一早班临时缺人，申请审批",
     "submittedBy": {
