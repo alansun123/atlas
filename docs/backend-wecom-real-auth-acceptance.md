@@ -46,6 +46,27 @@ Expected result for a real acceptance environment:
 
 If not, stop treating the environment as acceptance-ready.
 
+### Executable acceptance probe
+
+Once the real backend env is up and you have real callback `code` values to verify, run:
+
+```bash
+cd atlas-server
+ATLAS_BACKEND_BASE_URL=https://your-backend.example.com \
+ATLAS_WECOM_SUCCESS_CODE='<real mapped active-user code>' \
+ATLAS_WECOM_PENDING_CODE='<real unmapped-or-inactive-user code>' \
+npm run probe:wecom-acceptance
+```
+
+What it does:
+- validates `GET /api/auth/wework/url` returns `mode=real` and matches runtime env
+- verifies a success callback issues a token with `wecomMode=real`
+- verifies `/api/auth/me` works twice with the same token
+- verifies a pending-access callback returns truthful `pendingAccess` data
+- verifies `GET /api/auth/me` without token returns `401`
+
+If you do not yet have real callback codes, the script still records login URL and invalid-session evidence, and explicitly skips the missing callback stages.
+
 ## 3. Human-confirmed prerequisites
 
 These items are outside code but must be known before backend claims acceptance:

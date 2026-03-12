@@ -7,6 +7,7 @@
     "start": "node src/app.js",
     "dev": "node --watch src/app.js",
     "check:wecom-env": "node scripts/check-wecom-env.js",
+    "probe:wecom-acceptance": "node scripts/probe-wecom-acceptance.js",
     "test:auth": "node test-auth-smoke.js",
     "test:rbac": "node test-rbac-smoke.js",
     "test:approval-hardening": "node test-approval-hardening-smoke.js"

@@ -39,6 +39,16 @@ npm run check:wecom-env
 
 It will fail closed (`READY_FOR_REAL_AUTH_ENV_CHECK=false`) when the backend is still not truly ready for a real WeCom acceptance run.
 
+When a deployed backend is available and you have real callback codes to validate, run:
+
+```bash
+ATLAS_BACKEND_BASE_URL=https://your-backend.example.com \
+ATLAS_WECOM_SUCCESS_CODE='<real mapped active-user code>' \
+ATLAS_WECOM_PENDING_CODE='<real unmapped-or-inactive-user code>' \
+npm run probe:wecom-acceptance
+```
+
+This captures executable backend acceptance evidence for `/api/auth/wework/url`, success callback, pending-access callback, `/api/auth/me`, and the missing-token `401` path.
 
 ```bash
 ATLAS_AUTH_TOKEN_SECRET=atlas-dev-secret-change-me
