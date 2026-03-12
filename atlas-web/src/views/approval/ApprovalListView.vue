@@ -47,7 +47,7 @@ watch(() => route.query.tab, load)
       <RouterLink to="/approvals?tab=submitted">我提交的</RouterLink>
     </nav>
 
-    <small class="muted">当前数据源：{{ source === 'api' ? '后端 mock API' : '前端本地 mock fallback' }}</small>
+    <small class="muted">当前数据源：{{ source === 'api' ? '后端接口' : '前端本地 fallback（仅显式开启）' }}</small>
 
     <StateBlock v-if="loading" tone="loading" title="审批列表加载中" />
     <StateBlock v-else-if="error" tone="error" title="审批列表加载失败" :description="error" />

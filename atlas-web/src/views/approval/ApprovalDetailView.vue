@@ -77,7 +77,7 @@ onMounted(load)
       </section>
 
       <section class="card section-gap">
-        <small class="muted">当前数据源：{{ detail.source === 'api' ? '后端 mock API' : '前端本地 mock fallback' }}</small>
+        <small class="muted">当前数据源：{{ detail.source === 'api' ? '后端接口' : '前端本地 fallback（仅显式开启）' }}</small>
       </section>
 
       <section class="card section-gap">

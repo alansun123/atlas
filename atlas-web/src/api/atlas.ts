@@ -10,6 +10,7 @@ const ROLE_TO_USER_ID: Record<'employee' | 'manager' | 'operation', number> = {
 
 const APP_BASE_URL = (import.meta.env.VITE_APP_BASE_URL || window.location.origin).replace(/\/$/, '')
 const ENABLE_MOCK_LOGIN = String(import.meta.env.VITE_ENABLE_MOCK_LOGIN || 'false').toLowerCase() === 'true'
+const ENABLE_API_DATA_FALLBACK = String(import.meta.env.VITE_ENABLE_API_DATA_FALLBACK || 'false').toLowerCase() === 'true'
 const WECOM_CORP_ID = String(import.meta.env.VITE_WECOM_CORP_ID || '').trim()
 const WECOM_AGENT_ID = String(import.meta.env.VITE_WECOM_AGENT_ID || '').trim()
 const WECOM_REDIRECT_URI = String(import.meta.env.VITE_WECOM_REDIRECT_URI || `${APP_BASE_URL}/auth/callback`).trim()
@@ -77,6 +78,10 @@ export function isPendingAccessPayload(data: any) {
 
 export function isMockLoginEnabled() {
   return ENABLE_MOCK_LOGIN
+}
+
+export function isApiDataFallbackEnabled() {
+  return ENABLE_API_DATA_FALLBACK
 }
 
 export function isWeComEnvironment(userAgent = navigator.userAgent) {
@@ -147,10 +152,11 @@ export async function fetchHomeDataWithFallback(role: 'employee' | 'manager' | '
 }
 
 export async function fetchEmployeeScheduleWithFallback() {
+  const start = startOfWeek()
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+
   try {
-    const start = startOfWeek()
-    const end = new Date(start)
-    end.setDate(start.getDate() + 6)
     const data = await apiRequest<any>('/schedules/me?startDate=' + formatDate(start) + '&endDate=' + formatDate(end))
     const shifts: ShiftItem[] = (data.list || []).map((item: any) => ({
       id: String(item.scheduleId),
@@ -180,7 +186,8 @@ export async function fetchEmployeeScheduleWithFallback() {
       },
       shifts,
     }
-  } catch {
+  } catch (error) {
+    if (!ENABLE_API_DATA_FALLBACK) throw error
     return {
       source: 'mock' as const,
       ...(await fetchMockEmployeeSchedule()),
@@ -209,7 +216,8 @@ export async function fetchApprovalsWithFallback() {
       roleView: String(item.submittedBy) === me.id ? 'submitted' : (pendingIds.has(Number(item.id)) ? 'pending' : 'submitted'),
     }))
     return { source: 'api' as const, items }
-  } catch {
+  } catch (error) {
+    if (!ENABLE_API_DATA_FALLBACK) throw error
     return { source: 'mock' as const, items: await fetchMockApprovals() }
   }
 }
@@ -230,7 +238,8 @@ export async function fetchApprovalDetailWithFallback(id: string) {
       scheduleOverview: (batchDetail?.entries || []).map((entry: any) => `${formatMonthDay(entry.scheduleDate)} ${entry.shiftName}：${(entry.employees || []).map((e: any) => e.name).join('、') || '未排人'}`),
       history: [detail.approvedAt ? `已通过：${new Date(detail.approvedAt).toLocaleString('zh-CN')}` : '', detail.rejectedAt ? `已驳回：${new Date(detail.rejectedAt).toLocaleString('zh-CN')}` : ''].filter(Boolean),
     }
-  } catch {
+  } catch (error) {
+    if (!ENABLE_API_DATA_FALLBACK) throw error
     return { source: 'mock' as const, ...(await fetchMockApprovalDetail(id)) }
   }
 }
@@ -356,7 +365,8 @@ export async function fetchManagerScheduleWithFallback() {
         hasBackendBatch: true,
       },
     }
-  } catch {
+  } catch (error) {
+    if (!ENABLE_API_DATA_FALLBACK) throw error
     return {
       source: 'mock' as const,
       ...(await import('./mock').then((m) => m.fetchManagerSchedule())),

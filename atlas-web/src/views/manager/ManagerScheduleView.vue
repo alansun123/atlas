@@ -86,7 +86,7 @@ onMounted(load)
           <h3>{{ data.storeName }}</h3>
           <StatusTag :type="data.batchStatus === 'published' ? 'good' : 'warn'">{{ data.batchStatus }}</StatusTag>
         </div>
-        <small class="muted">当前优先走 <code>/api/stores</code>、<code>/api/stores/:id/shifts</code>、<code>/api/employees</code>、<code>/api/schedules/batches</code>、<code>/validate</code>；失败时回退本地 mock。</small>
+        <small class="muted">当前走真实后端链路：<code>/api/stores</code>、<code>/api/stores/:id/shifts</code>、<code>/api/employees</code>、<code>/api/schedules/batches</code>、<code>/validate</code>。若需临时启用前端本地 fallback，必须显式设置 <code>VITE_ENABLE_API_DATA_FALLBACK=true</code>。</small>
         <div class="grid-cards compact-grid">
           <article v-for="card in data.summary" :key="card.label" class="metric-card small-card">
             <small>{{ card.label }}</small>

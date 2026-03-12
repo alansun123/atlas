@@ -50,7 +50,7 @@ onMounted(load)
           <h3>本周班表</h3>
           <a class="ghost-btn inline-btn" href="https://work.weixin.qq.com/" target="_blank">去企微请假</a>
         </div>
-        <small class="muted">当前优先读取后端 <code>/api/schedules/me</code>；接口失败时回退本地 mock。</small>
+        <small class="muted">当前读取后端 <code>/api/schedules/me</code>。若需临时启用前端本地 fallback，必须显式设置 <code>VITE_ENABLE_API_DATA_FALLBACK=true</code>。</small>
         <div v-if="data.shifts.length" class="stack-list">
           <article v-for="shift in data.shifts" :key="shift.id" class="list-row">
             <div>
