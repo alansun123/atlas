@@ -1,5 +1,7 @@
 const assert = require('assert');
 const express = require('express');
+const Database = require('better-sqlite3');
+const path = require('path');
 
 process.env.ATLAS_AUTH_TOKEN_SECRET = 'test-secret';
 process.env.ATLAS_WECOM_AUTH_MODE = 'stub';
@@ -14,12 +16,23 @@ process.env.ATLAS_WECOM_CODE_MAP = JSON.stringify({
 });
 
 const { app } = require('./src/app');
-const { db } = require('./src/stores');
+const { createUser } = require('./src/stores');
+
+const qaDb = new Database(path.join(__dirname, 'data/atlas.db'));
+const qaUserIds = [];
+
+function cleanupQaUsers() {
+  if (!qaUserIds.length) return;
+  const deleteUser = qaDb.prepare('DELETE FROM users WHERE id = ?');
+  const runDelete = qaDb.transaction((ids) => {
+    for (const id of ids) deleteUser.run(id);
+  });
+  runDelete(qaUserIds.splice(0, qaUserIds.length));
+}
 
 async function run() {
-  db.users.push(
-    {
-      id: 901,
+  qaUserIds.push(
+    createUser({
       weworkUserId: 'blocked_user',
       name: '冻结用户',
       mobile: '13800000901',
@@ -28,9 +41,8 @@ async function run() {
       joinedAt: '2026-03-01T09:00:00.000Z',
       permissions: ['schedule:read:self'],
       primaryStoreId: 1,
-    },
-    {
-      id: 902,
+    }).id,
+    createUser({
       weworkUserId: 'no_scope_user',
       name: '无权限用户',
       mobile: '13800000902',
@@ -39,7 +51,7 @@ async function run() {
       joinedAt: '2026-03-01T09:00:00.000Z',
       permissions: [],
       primaryStoreId: null,
-    },
+    }).id,
   );
 
   const server = app.listen(0);
@@ -193,7 +205,7 @@ async function run() {
 
     console.log('Auth smoke passed');
   } finally {
-    db.users = db.users.filter((item) => ![901, 902].includes(item.id));
+    cleanupQaUsers();
     server.close();
     wecomServer.close();
   }
