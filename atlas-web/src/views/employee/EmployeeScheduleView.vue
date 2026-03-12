@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import StatusTag from '../../components/common/StatusTag.vue'
@@ -33,7 +34,10 @@ onMounted(load)
 
     <StateBlock v-if="loading" tone="loading" title="班表加载中" />
     <StateBlock v-else-if="error" tone="error" title="班表加载失败" :description="error">
-      <button class="primary-btn inline-btn" @click="load">重试</button>
+      <div class="section-title-row">
+        <button class="primary-btn inline-btn" @click="load">重试</button>
+        <RouterLink class="ghost-btn inline-btn" to="/login">返回登录</RouterLink>
+      </div>
     </StateBlock>
 
     <template v-else-if="data">

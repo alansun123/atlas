@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import WeekSwitcher from '../../components/schedule/WeekSwitcher.vue'
@@ -79,7 +80,9 @@ onMounted(load)
     <WeekSwitcher v-if="data" :label="data.weekRange" @change="load" />
 
     <StateBlock v-if="loading" tone="loading" title="排班数据加载中" />
-    <StateBlock v-else-if="error" tone="error" title="排班加载失败" :description="error" />
+    <StateBlock v-else-if="error" tone="error" title="排班加载失败" :description="error">
+      <RouterLink class="ghost-btn inline-btn" to="/login">返回登录</RouterLink>
+    </StateBlock>
 
     <template v-else-if="data">
       <IntegrationNotice

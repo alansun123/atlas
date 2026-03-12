@@ -231,6 +231,15 @@ async function handleFallbackableError(error: unknown) {
   }
 }
 
+async function runMutationWithSessionGuard<T>(actionLabel: string, request: () => Promise<T>) {
+  try {
+    return await request()
+  } catch (error) {
+    await handleFallbackableError(error)
+    throw new Error(getErrorMessage(error, actionLabel))
+  }
+}
+
 export async function fetchApprovalsWithFallback() {
   try {
     const [pending, all, me] = await Promise.all([
@@ -433,36 +442,36 @@ export async function fetchManagerScheduleWithFallback() {
 }
 
 export async function submitManagerApproval(batchId: string | number, comment = '前端发起审批') {
-  return apiRequest<any>(`/schedules/batches/${batchId}/submit-approval`, {
+  return runMutationWithSessionGuard('提交审批', () => apiRequest<any>(`/schedules/batches/${batchId}/submit-approval`, {
     method: 'POST',
     body: JSON.stringify({ comment, triggerReasons: ['前端联调提审'] }),
-  })
+  }))
 }
 
 export async function publishManagerBatch(batchId: string | number) {
-  return apiRequest<any>(`/schedules/batches/${batchId}/publish`, {
+  return runMutationWithSessionGuard('发布排班', () => apiRequest<any>(`/schedules/batches/${batchId}/publish`, {
     method: 'POST',
     body: JSON.stringify({ notifyEmployees: false }),
-  })
+  }))
 }
 
 export async function revalidateManagerBatch(batchId: string | number) {
-  return apiRequest<any>(`/schedules/batches/${batchId}/validate`, {
+  return runMutationWithSessionGuard('校验排班', () => apiRequest<any>(`/schedules/batches/${batchId}/validate`, {
     method: 'POST',
     body: JSON.stringify({}),
-  })
+  }))
 }
 
 export async function approveApproval(id: string, comment = '前端联调审批通过') {
-  return apiRequest<any>(`/approvals/${id}/approve`, {
+  return runMutationWithSessionGuard('审批通过', () => apiRequest<any>(`/approvals/${id}/approve`, {
     method: 'POST',
     body: JSON.stringify({ comment }),
-  })
+  }))
 }
 
 export async function rejectApproval(id: string, comment = '前端联调驳回') {
-  return apiRequest<any>(`/approvals/${id}/reject`, {
+  return runMutationWithSessionGuard('审批驳回', () => apiRequest<any>(`/approvals/${id}/reject`, {
     method: 'POST',
     body: JSON.stringify({ comment }),
-  })
+  }))
 }
