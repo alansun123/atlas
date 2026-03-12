@@ -48,7 +48,7 @@ ATLAS_WECOM_PENDING_CODE='<real unmapped-or-inactive-user code>' \
 npm run probe:wecom-acceptance
 ```
 
-This captures executable backend acceptance evidence for `/api/auth/wework/url`, success callback, pending-access callback, `/api/auth/me`, and the missing-token `401` path.
+This captures executable backend acceptance evidence for `/api/auth/wework/url`, success callback, pending-access callback, `/api/auth/me`, the missing-token `401` path, and—when a success token is available—the malformed-token `401` path plus the explicit stateless `/api/auth/logout` contract.
 
 ```bash
 ATLAS_AUTH_TOKEN_SECRET=atlas-dev-secret-change-me

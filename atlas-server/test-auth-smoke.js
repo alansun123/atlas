@@ -112,6 +112,13 @@ async function run() {
     assert.equal(me.status, 200);
     assert.equal(me.json.data.id, 101);
 
+    const malformedToken = `${activeCallback.json.data.accessToken.slice(0, -1)}x`;
+    const malformedMe = await request('/api/auth/me', {
+      token: malformedToken,
+    });
+    assert.equal(malformedMe.status, 401);
+    assert.equal(malformedMe.json.data.reason, 'invalid-signature');
+
     const unmapped = await request('/api/auth/wework/callback', {
       method: 'POST',
       body: { code: 'unmapped_code' },

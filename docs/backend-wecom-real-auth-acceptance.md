@@ -65,6 +65,7 @@ What it does:
 - verifies `/api/auth/me` works twice with the same token
 - verifies a pending-access callback returns truthful `pendingAccess` data
 - verifies `GET /api/auth/me` without token returns `401`
+- when a success token is available, also verifies malformed-token `401` and the explicit stateless `/api/auth/logout` contract
 
 If you do not yet have real callback codes, the script still records login URL and invalid-session evidence, and explicitly skips the missing callback stages.
 

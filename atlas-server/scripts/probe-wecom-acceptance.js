@@ -27,6 +27,20 @@ function maskToken(token) {
   return `${token.slice(0, 6)}***${token.slice(-4)}`;
 }
 
+function buildMalformedToken(validToken) {
+  if (!validToken || typeof validToken !== 'string' || !validToken.includes('.')) {
+    return 'malformed.invalid';
+  }
+
+  const [encodedPayload, signature] = validToken.split('.');
+  if (!signature) {
+    return 'malformed.invalid';
+  }
+
+  const tamperedLastChar = signature.slice(-1) === 'a' ? 'b' : 'a';
+  return `${encodedPayload}.${signature.slice(0, -1)}${tamperedLastChar}`;
+}
+
 async function requestJson(baseUrl, path, { method = 'GET', body, token } = {}) {
   const url = new URL(path, `${baseUrl.toString()}/`);
   const res = await fetch(url, {
@@ -173,10 +187,39 @@ async function main() {
   printSection('invalid session');
   const invalidRes = await requestJson(baseUrl, '/api/auth/me');
   assertCondition(invalidRes.status === 401, 'GET /api/auth/me without token must return 401', invalidRes.json || invalidRes.text);
+
+  let malformedTokenEvidence = null;
+  if (issuedToken) {
+    const malformedToken = buildMalformedToken(issuedToken);
+    const malformedRes = await requestJson(baseUrl, '/api/auth/me', { token: malformedToken });
+    assertCondition(malformedRes.status === 401, 'GET /api/auth/me with malformed token must return 401', malformedRes.json || malformedRes.text);
+    malformedTokenEvidence = {
+      status: malformedRes.status,
+      reason: malformedRes.json?.data?.reason || null,
+      tokenPreview: maskToken(malformedToken),
+    };
+  }
+
   printEvidence('invalidSessionEvidence', {
-    status: invalidRes.status,
-    body: invalidRes.json || invalidRes.text,
+    missingToken: {
+      status: invalidRes.status,
+      body: invalidRes.json || invalidRes.text,
+    },
+    malformedToken: malformedTokenEvidence,
   });
+
+  if (issuedToken) {
+    printSection('logout contract');
+    const logoutRes = await requestJson(baseUrl, '/api/auth/logout', {
+      method: 'POST',
+      token: issuedToken,
+    });
+    assertCondition(logoutRes.status === 200, 'POST /api/auth/logout with valid token must return 200', logoutRes.json || logoutRes.text);
+    assertCondition(logoutRes.json?.data?.tokenInvalidation === 'not_implemented_stateless_logout', 'logout contract must stay explicit/stateless', logoutRes.json || logoutRes.text);
+    printEvidence('logoutEvidence', logoutRes.json?.data || logoutRes.json || logoutRes.text);
+  } else {
+    console.log('SKIP logout contract: success callback token not available in this run.');
+  }
 
   console.log('\nACCEPTANCE_PROBE_COMPLETE=true');
 }

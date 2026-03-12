@@ -48,8 +48,12 @@ function printWarn(label, detail = '') {
 
 function main() {
   const config = getWecomAuthConfig();
+  const tokenSecret = process.env.ATLAS_AUTH_TOKEN_SECRET || '';
+  const hasTokenSecret = Boolean(tokenSecret);
+  const usesDefaultTokenSecret = tokenSecret === 'atlas-dev-secret-change-me';
   const redirectCheck = validateHttpsRedirect(config.redirectUri);
   const missingForReal = [
+    !hasTokenSecret ? 'ATLAS_AUTH_TOKEN_SECRET' : null,
     !config.corpId ? 'WECOM_CORP_ID' : null,
     !config.agentId ? 'WECOM_AGENT_ID' : null,
     !config.secret ? 'WECOM_SECRET' : null,
@@ -60,6 +64,7 @@ function main() {
   console.log('===================================');
   console.log(`configuredMode=${config.configuredMode}`);
   console.log(`effectiveMode=${config.mode}`);
+  console.log(`tokenSecret=${hasTokenSecret ? (usesDefaultTokenSecret ? 'present(default-dev-secret)' : 'present(custom)') : '(missing)'}`);
   console.log(`corpId=${config.corpId || '(missing)'}`);
   console.log(`agentId=${config.agentId || '(missing)'}`);
   console.log(`secret=${config.secret ? mask(config.secret) : '(missing)'}`);
@@ -69,6 +74,7 @@ function main() {
   console.log(`allowRedirectOverride=${config.allowRedirectOverride}`);
   console.log('');
 
+  printCheck(hasTokenSecret, 'ATLAS_AUTH_TOKEN_SECRET present');
   printCheck(Boolean(config.corpId), 'WECOM_CORP_ID present');
   printCheck(Boolean(config.agentId), 'WECOM_AGENT_ID present');
   printCheck(Boolean(config.secret), 'WECOM_SECRET present');
@@ -76,8 +82,12 @@ function main() {
   printCheck(redirectCheck.ok, 'WECOM_REDIRECT_URI format looks acceptable', redirectCheck.reason || '');
   printCheck(config.hasRealCredentials, 'real credential triplet available');
 
-  if (config.configuredMode === 'real' && !config.hasRealCredentials) {
+  if (config.configuredMode === 'real' && missingForReal.length > 0) {
     printWarn('ATLAS_WECOM_AUTH_MODE=real but required env is incomplete', `missing: ${missingForReal.join(', ')}`);
+  }
+
+  if (usesDefaultTokenSecret) {
+    printWarn('ATLAS_AUTH_TOKEN_SECRET is still using the default dev secret', 'real/shared acceptance evidence should use a custom secret');
   }
 
   if (config.mode !== 'real') {
@@ -100,7 +110,7 @@ function main() {
   console.log('  npm run test:auth');
   console.log('  # then run real env probes against the deployed backend once secrets + callback domain exist');
 
-  if (config.mode === 'real' && config.hasRealCredentials && redirectCheck.ok) {
+  if (config.mode === 'real' && hasTokenSecret && !usesDefaultTokenSecret && config.hasRealCredentials && redirectCheck.ok) {
     console.log('');
     console.log('READY_FOR_REAL_AUTH_ENV_CHECK=true');
     process.exitCode = 0;
