@@ -1,169 +1,192 @@
-# Atlas QA Watchdog — Sprint 2 WeCom Auth Check
+# Atlas QA Watchdog — Sprint 2 WeCom Auth Retest
 
 > Date: 2026-03-12
-> Scope: current `main` branch Sprint 2 real-auth-first kickoff state
+> Scope: retest on `main` after backend commit `884074b` (`feat(atlas-server): add wecom auth url and real exchange boundary`)
 
 ## Verdict
 
-**Partially blocked / not yet QA-ready for real WeCom auth.**
+**Previously blocked items are materially reduced. Stub/integration QA is now in good shape; real WeCom E2E QA is closer but still not fully acceptance-ready without real tenant credentials and a live callback environment.**
 
-What is in a sane state:
-- `atlas-server` auth smoke passes for the new signed-token + WeCom callback stub flow.
-- `atlas-server` RBAC/state smoke passes.
-- `atlas-web` builds successfully and contains the new login + callback views.
+### Status against the prior blockers
+1. **Missing `GET /api/auth/wework/url`** → **RESOLVED**
+2. **Backend callback only stub/env-based, not real-capable** → **PARTIALLY RESOLVED**
+   - Real-mode exchange boundary now exists and is smoke-covered.
+   - Full acceptance still depends on real WeCom credentials / reachable callback environment.
+3. **`atlas-server/.env.example` missing clear real WeCom env contract** → **RESOLVED**
 
-What is still blocking real-auth-first QA:
-- Backend does **not** expose `GET /api/auth/wework/url` yet.
-- Backend WeCom callback is still **stub/env-based**, not a real secret-backed WeCom exchange.
-- Frontend can only continue the auth flow if either:
-  - backend adds `/api/auth/wework/url`, or
-  - frontend runtime env provides `VITE_WECOM_CORP_ID` + `VITE_WECOM_AGENT_ID` + redirect URI.
-- `atlas-server` has no general `npm test` script, so repo-level default test entry is not ready.
-
-Bottom line: **the Sprint 2 auth direction is structurally sane, but the real WeCom path is incomplete rather than broken.** Current code is suitable for stubbed QA and frontend shell validation, not for end-to-end real WeCom acceptance.
+Bottom line: **the auth contract is now coherent enough for frontend alignment and backend smoke validation.** The remaining gap is no longer “missing route / missing contract”; it is **real-environment verification**.
 
 ## What I verified
 
-### 1) Package scripts / QA surfaces
-
-#### `atlas-web/package.json`
-- `npm run dev`
-- `npm run build`
-- `npm run preview`
-
-#### `atlas-server/package.json`
-- `npm start`
-- `npm run dev`
-- `npm run test:auth`
-- `npm run test:rbac`
-
-Note:
-- `npm test` currently fails because no `test` script is defined.
-
-### 2) Env examples
-
-#### `atlas-web/.env.example`
-Contains:
-- `VITE_API_BASE_URL`
-- `VITE_APP_BASE_URL`
-- `VITE_WECOM_REDIRECT_URI`
-- `VITE_WECOM_CORP_ID`
-- `VITE_WECOM_AGENT_ID`
-- `VITE_ENABLE_MOCK_LOGIN`
-
-Interpretation:
-- Frontend has a documented env-based fallback for constructing the WeCom OAuth URL if backend URL generation is absent.
-
-#### `atlas-server/.env.example`
-Contains only stub-oriented auth envs:
-- `ATLAS_AUTH_TOKEN_SECRET`
-- `ATLAS_AUTH_TOKEN_TTL_SECONDS`
-- `ATLAS_WECOM_AUTH_MODE=stub`
-- `ATLAS_WECOM_CODE_MAP`
-- `ATLAS_WECOM_STUB_USER_ID`
-- `ATLAS_WECOM_STUB_USER_NAME`
-
-Interpretation:
-- Server-side env example does **not** yet document real WeCom app credentials / secret-backed callback exchange.
-
-### 3) Auth entrypoints inspected
-
-#### Backend
+### 1) Backend auth contract
+Inspected:
 - `atlas-server/src/modules/auth/index.js`
 - `atlas-server/src/services/wework-auth.js`
+- `atlas-server/src/config/auth.js`
 - `atlas-server/src/middlewares/auth.js`
-- `atlas-server/src/services/auth-token.js`
+- `atlas-server/test-auth-smoke.js`
+- `atlas-server/.env.example`
 
-Observed behavior:
-- `POST /api/auth/wework/callback` exists and issues signed access tokens for resolved identities.
-- unresolved / inactive / unusable identities are handled cleanly with pending-access semantics.
-- `POST /api/auth/mock-login` still exists as a fallback/demo path.
-- `GET /api/auth/wework/url` is **not implemented**.
-- `wework-auth.js` resolves users only via `ATLAS_WECOM_CODE_MAP`, `stub:*`, `mock:*`, or env stub user.
+Observed:
+- `GET /api/auth/wework/url` now exists.
+- URL builder returns structured metadata: `url`, `loginType`, `mode`, `configuredMode`, `corpId`, `agentId`, `redirectUri`, `scope`, `state`.
+- `POST /api/auth/wework/callback` now supports:
+  - signed-token login for mapped active users
+  - `pendingAccess=true` for `unmapped` / `inactive` / `unusable`
+  - real-mode exchange path via WeCom token + userinfo endpoints
+- `GET /api/auth/me` works off signed backend tokens.
+- `POST /api/auth/logout` is explicitly documented in response as stateless/non-invalidating (`tokenInvalidation: not_implemented_stateless_logout`).
+- `.env.example` now clearly documents real WeCom env names and mode switching:
+  - `ATLAS_WECOM_AUTH_MODE`
+  - `WECOM_CORP_ID`
+  - `WECOM_AGENT_ID`
+  - `WECOM_SECRET`
+  - `WECOM_REDIRECT_URI`
+  - endpoint override envs for smoke/integration testing
 
-#### Frontend
-- `atlas-web/src/views/common/LoginView.vue`
-- `atlas-web/src/views/common/AuthCallbackView.vue`
-- `atlas-web/src/stores/session.ts`
+### 2) Backend smoke coverage
+Observed in `atlas-server/test-auth-smoke.js`:
+- covers `/api/auth/wework/url`
+- covers mapped active callback success
+- covers `pendingAccess` branches for `unmapped`, `inactive`, `unusable`
+- covers signed-token `GET /api/auth/me`
+- covers failure on unknown code
+- covers real-mode exchange boundary through stubbed local WeCom endpoints
+
+Interpretation:
+- This is a meaningful improvement over the prior state because the real-mode boundary is no longer just theoretical; it is executable in smoke tests.
+
+### 3) Frontend alignment with backend contract
+Inspected:
 - `atlas-web/src/api/atlas.ts`
+- `atlas-web/src/views/common/AuthCallbackView.vue`
+- `atlas-web/src/router/index.ts`
+- `atlas-web/package.json`
 
-Observed behavior:
-- Login page is now real-auth-first.
-- Frontend first requests `/auth/wework/url`.
-- If backend returns 404, frontend falls back to constructing the URL locally from env.
-- Callback page posts `code` to `/auth/wework/callback`.
-- Mock login is guarded behind `VITE_ENABLE_MOCK_LOGIN=true`.
+Observed:
+- Frontend requests `/auth/wework/url` first, which now matches backend capability.
+- Frontend callback posts `{ code, state }` to `/auth/wework/callback`, which is compatible with backend.
+- Frontend treats `pendingAccess` / missing token / pending role as a redirect to `/pending-access`, which matches backend payload semantics.
+- Frontend still keeps a fallback OAuth URL builder from env if backend URL fetch fails; this is no longer the primary dependency.
 
-## QA-safe validation actually run
+## QA-safe checks actually run
 
-### Backend smoke
+### Commands run
 ```bash
+cd /Users/xiaomax/.openclaw/workspace/projects/atlas
+
+git rev-parse --abbrev-ref HEAD
+git rev-parse --short HEAD
+git status --short
+
+find atlas-server/src atlas-web/src -type f \( -name '*.js' -o -name '*.ts' -o -name '*.tsx' -o -name '*.jsx' \) | xargs grep -nE '/api/auth/wework/url|wework|WeCom|callback|oauth'
+
+sed -n '1,220p' atlas-server/.env.example
+sed -n '1,260p' atlas-server/src/modules/auth/index.js
+sed -n '1,220p' atlas-server/src/middlewares/auth.js
+sed -n '1,260p' atlas-server/src/services/wework-auth.js
+sed -n '1,240p' atlas-server/src/config/auth.js
+sed -n '1,220p' atlas-server/test-auth-smoke.js
+sed -n '1,220p' atlas-web/src/api/atlas.ts
+sed -n '1,220p' atlas-web/src/views/common/AuthCallbackView.vue
+cat atlas-server/package.json
+cat atlas-web/package.json
+
 cd atlas-server && npm run test:auth
-cd atlas-server && npm run test:rbac
+cd ../atlas-web && npm run build
+
+cd ../atlas-server && node - <<'NODE'
+process.env.ATLAS_AUTH_TOKEN_SECRET='qa-secret';
+process.env.ATLAS_WECOM_AUTH_MODE='stub';
+process.env.WECOM_CORP_ID='ww-qa';
+process.env.WECOM_AGENT_ID='1000001';
+process.env.WECOM_REDIRECT_URI='https://atlas.example.com/auth/callback';
+process.env.ATLAS_WECOM_CODE_MAP=JSON.stringify({
+  qa_manager:{weworkUserId:'manager_zhangsan',name:'张三'},
+  qa_unmapped:{weworkUserId:'external_user',name:'外部用户'}
+});
+const { app } = require('./src/app');
+const server = app.listen(0, async () => {
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const j = async (path, opts={}) => {
+    const res = await fetch(base+path, opts);
+    return {status: res.status, body: await res.text()};
+  };
+  console.log(await j('/api/auth/wework/url'));
+  console.log(await j('/api/auth/wework/callback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:'qa_manager'})}));
+  console.log(await j('/api/auth/wework/callback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:'qa_unmapped'})}));
+  server.close();
+});
+NODE
+
+cd ../atlas-server && node - <<'NODE'
+process.env.ATLAS_AUTH_TOKEN_SECRET='qa-secret';
+process.env.ATLAS_WECOM_AUTH_MODE='stub';
+process.env.WECOM_CORP_ID='ww-qa';
+process.env.WECOM_AGENT_ID='1000001';
+process.env.WECOM_REDIRECT_URI='https://atlas.example.com/auth/callback';
+process.env.ATLAS_WECOM_CODE_MAP=JSON.stringify({qa_manager:{weworkUserId:'manager_zhangsan',name:'张三'}});
+const { app } = require('./src/app');
+const server = app.listen(0, async () => {
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const login = await fetch(base+'/api/auth/wework/callback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:'qa_manager'})});
+  const loginJson = await login.json();
+  const token = loginJson.data.accessToken;
+  const me = await fetch(base+'/api/auth/me',{headers:{authorization:`Bearer ${token}`}});
+  const logout = await fetch(base+'/api/auth/logout',{method:'POST',headers:{authorization:`Bearer ${token}`}});
+  console.log('ME', me.status, await me.text());
+  console.log('LOGOUT', logout.status, await logout.text());
+  server.close();
+});
+NODE
 ```
-Result:
-- PASS: auth smoke
-- PASS: RBAC/state smoke
 
-### Frontend build
-```bash
-cd atlas-web && npm run build
-```
-Result:
-- PASS
-- Non-blocking warning: `src/api/mock.ts` is both statically and dynamically imported, so chunk split optimization does not happen.
+## Pass / fail results
 
-### Direct auth path probe
-```bash
-cd atlas-server && PORT=3110 node src/app.js
-curl -i http://127.0.0.1:3110/api/auth/wework/url
-curl -i -X POST http://127.0.0.1:3110/api/auth/wework/callback -H 'Content-Type: application/json' -d '{"code":"unknown_code"}'
-curl -i -X POST http://127.0.0.1:3110/api/auth/wework/callback -H 'Content-Type: application/json' -d '{"code":"stub:manager_zhangsan"}'
-```
-Result:
-- `GET /api/auth/wework/url` -> **404 Route not found**
-- `POST /api/auth/wework/callback` with unknown code -> **401** with `reason=identity-not-resolved`, `mode=stub`
-- `POST /api/auth/wework/callback` with `stub:manager_zhangsan` -> **200**, signed token issued, `loginType=wecom`, `wecomMode=stub`
+### PASS
+- `atlas-server`: `npm run test:auth`
+- `atlas-web`: `npm run build`
+- Direct probe: `GET /api/auth/wework/url` returns `200` and a valid WeCom OAuth URL payload.
+- Direct probe: mapped callback returns `200`, signed token, `loginType=wecom`, `wecomMode=stub`.
+- Direct probe: unmapped callback returns `200` with `pendingAccess=true` and `accessState=unmapped`.
+- Direct probe: `GET /api/auth/me` succeeds with backend-issued bearer token.
+- Direct probe: `POST /api/auth/logout` returns explicit stateless logout contract.
 
-## Blocked by missing env / secrets / implementation
+### NON-BLOCKING
+- Frontend build emits one Vite warning about `src/api/mock.ts` being both statically and dynamically imported. This is not an auth-contract blocker.
+- Repo status shows untracked local file `atlas-web/.env`; I did not modify it.
 
-### Hard blockers for real WeCom E2E QA
-1. **Missing backend auth URL endpoint**
-   - Frontend prefers `/api/auth/wework/url`.
-   - Current backend returns 404.
+### NOT VERIFIED IN THIS QA RETEST
+- Real tenant WeCom login against actual `WECOM_CORP_ID / AGENT_ID / SECRET`
+- Live callback redirect hosted in a reachable environment
+- Real user provisioning lifecycle beyond current mock/in-memory local user source
 
-2. **No real backend WeCom exchange implementation exposed yet**
-   - Current backend auth service is stub/env-based only.
-   - No verified real-code -> real-identity network exchange path was found.
+## Remaining blockers / gaps
 
-3. **No real WeCom credential contract documented in server env example**
-   - Server example does not yet show corp/app secret style configuration needed for true E2E validation.
+### 1) Real-environment acceptance gap
+The backend now has a real exchange boundary, but this retest did **not** validate against an actual WeCom tenant. So the remaining blocker is:
+- **owner: backend + ops**
+- provide real test credentials and reachable callback environment for a true end-to-end acceptance run
 
-### Soft blocker / QA ergonomics
-4. **No default `npm test` script in `atlas-server`**
-   - This is not a feature blocker, but it hurts predictable QA automation.
+### 2) Local user source is still mock/in-memory
+The login contract is improved, but the local Atlas user lookup still resolves from mock data.
+- This is acceptable for current integration smoke.
+- It is still a gap for durable multi-environment QA / staging realism.
+- **owner: backend / tech lead**
 
-## Regression check
+### 3) Logout remains stateless only
+This is documented now, so it is no longer a surprise blocker, but it remains a limitation.
+- **owner: backend** if server-side invalidation becomes a Sprint requirement
 
-I did **not** find evidence that Sprint 2 auth kickoff regressed the currently committed smoke-covered backend auth/RBAC paths.
+## QA conclusion
 
-The issue is not “new flow is broken everywhere”; it is more precise:
-- **stub flow works**
-- **frontend shell/build works**
-- **real WeCom entrypoint contract is incomplete**
+Compared with the pre-`884074b` state, the Sprint 2 auth path is in a **meaningfully better and testable** state:
+- the missing backend URL endpoint is fixed
+- the callback path now has a real-mode exchange boundary
+- the env contract is documented
+- frontend expectations are aligned with the backend contract
+- smoke coverage is materially better
 
-## Exact handoff recommendation
+So the right QA label now is:
 
-Hand off back to implementation with this priority order:
-
-1. **Add backend `GET /api/auth/wework/url`** so frontend no longer depends on fragile client-side fallback config.
-2. **Implement/document the real WeCom code exchange path** in `atlas-server`, including required env names in `.env.example`.
-3. **Once the above exists, rerun QA with actual test credentials** for:
-   - login redirect initiation
-   - callback exchange
-   - mapped active user
-   - unmapped user pending-access path
-   - inactive/unusable user pending-access path
-4. Optionally add a top-level/default test entry (`npm test`) for cleaner CI/QA invocation.
-
-Until (1) and (2) land, this branch should be treated as **stub-valid but not real-auth acceptance-ready**.
+**stub/integration PASS, real WeCom E2E still pending environment-backed acceptance.**
