@@ -19,6 +19,7 @@ const load = async () => {
   try {
     data.value = await fetchEmployeeScheduleWithFallback()
   } catch (err) {
+    data.value = null
     error.value = err instanceof Error ? err.message : '班表加载失败'
   } finally {
     loading.value = false
@@ -32,7 +33,7 @@ onMounted(load)
   <AppShell title="我的班表" subtitle="员工侧周班表演示">
     <WeekSwitcher v-if="data" :label="data.weekRange" @change="load" />
 
-    <StateBlock v-if="loading" tone="loading" title="班表加载中" />
+    <StateBlock v-if="loading" tone="loading" title="班表加载中" description="正在确认当前周班表与今日班次状态。" />
     <StateBlock v-else-if="error" tone="error" title="班表加载失败" :description="error">
       <div class="section-title-row">
         <button class="primary-btn inline-btn" @click="load">重试</button>
@@ -46,7 +47,9 @@ onMounted(load)
         :tone="data.noticeTone"
         :title="data.source === 'api' ? '员工班表当前处于真实接口模式' : '员工班表当前处于 fallback 模式'"
         :points="data.noticePoints"
-      />
+      >
+        <small v-if="data.source !== 'api'">当前周班表来自前端 fallback/mock，仅用于演示，不应当作真实排班已联通的证据。</small>
+      </IntegrationNotice>
 
       <section class="card section-gap">
         <div class="section-title-row">
@@ -63,7 +66,7 @@ onMounted(load)
           <a class="ghost-btn inline-btn" href="https://work.weixin.qq.com/" target="_blank">去企微请假</a>
         </div>
         <small class="muted">当前读取后端 <code>/api/schedules/me</code>。若需临时启用前端本地 fallback，必须显式设置 <code>VITE_ENABLE_API_DATA_FALLBACK=true</code>。</small>
-        <div v-if="data.shifts.length" class="stack-list">
+        <div v-if="data.shifts?.length" class="stack-list">
           <article v-for="shift in data.shifts" :key="shift.id" class="list-row">
             <div>
               <strong>{{ shift.date }} {{ shift.weekday }} · {{ shift.shiftName }}</strong>
@@ -75,7 +78,11 @@ onMounted(load)
             </StatusTag>
           </article>
         </div>
-        <StateBlock v-else title="本周暂无已发布班次" description="店长尚未发布本周排班。" />
+        <StateBlock
+          v-else
+          title="本周暂无已发布班次"
+          :description="data.source === 'mock' ? 'fallback/mock 数据下当前没有班次；如需确认真实结果，请刷新或检查接口状态。' : '店长尚未发布本周排班。'"
+        />
       </section>
     </template>
   </AppShell>
