@@ -23,7 +23,7 @@
 
 ## 仓库
 
-- GitHub: github.com/alansun123/scheduling-system
+- GitHub: github.com/alansun123/atlas
 
 ## 技术栈
 

@@ -3,7 +3,7 @@
 > 项目：Atlas 智能排班系统
 > Sprint：Sprint 1（2026-03-11 ~ 2026-03-17）
 > QA：Andy
-> 依据文档：`docs/智能排班系统PRD.md`、`projects/atlas/SPRINT1.md`、`projects/atlas/README.md`
+> 依据文档：`SPRINT1.md`、`README.md`、`docs/api.md`、`docs/database.md`、`docs/frontend-pages.md`
 
 ---
 
