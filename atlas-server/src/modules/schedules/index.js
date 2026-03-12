@@ -1,6 +1,6 @@
 const express = require('express');
-const { db, getStoreById, getShiftById, getUserById, getEntriesByBatchId, getApprovalById } = require('../../stores');
-const { requireAuth } = require('../../middlewares/auth');
+const { db, getStoreById, getShiftById, getUserById, getEntriesByBatchId } = require('../../stores');
+const { requireAuth, requirePermission } = require('../../middlewares/auth');
 const { success, fail } = require('../../utils/response');
 const { toInt } = require('../../utils/helpers');
 
@@ -13,6 +13,26 @@ function now() {
 
 function getBatchById(id) {
   return db.scheduleBatches.find((item) => item.id === Number(id));
+}
+
+function ensureStoreManager(req, res, batchOrStoreId) {
+  const storeId = Number(typeof batchOrStoreId === 'object' ? batchOrStoreId.storeId : batchOrStoreId);
+  const store = getStoreById(storeId);
+  if (!store) {
+    fail(res, 1002, '门店不存在', {}, 404);
+    return null;
+  }
+
+  if (req.user.role === 'operation_manager') {
+    return store;
+  }
+
+  if (store.managerUserId !== req.user.id) {
+    fail(res, 2004, '仅门店店长可操作本门店排班', { storeId }, 403);
+    return null;
+  }
+
+  return store;
 }
 
 function buildEntry(input, { batchId, storeId, createdBy, status = 'draft', source = 'manual' }) {
@@ -181,11 +201,12 @@ function validateBatch(batchId) {
 
 router.get('/', (_req, res) => success(res, db.scheduleBatches.map(buildBatchDetail)));
 
-router.post('/batches', (req, res) => {
+router.post('/batches', requirePermission('schedule:create', '员工不能创建排班'), (req, res) => {
   const { storeId, weekStartDate, weekEndDate, entries = [], remark = '' } = req.body || {};
   if (!storeId || !weekStartDate || !weekEndDate) {
     return fail(res, 1001, 'storeId、weekStartDate、weekEndDate 为必填字段');
   }
+  if (!ensureStoreManager(req, res, storeId)) return;
 
   const batchId = db.counters.scheduleBatchId += 1;
   const batch = {
@@ -218,12 +239,25 @@ router.post('/batches', (req, res) => {
   return success(res, buildBatchDetail(batch), 'created', 201);
 });
 
-router.patch('/batches/:id', (req, res) => {
+router.patch('/batches/:id', requirePermission('schedule:create', '员工不能修改排班'), (req, res) => {
   const batch = getBatchById(req.params.id);
   if (!batch) return fail(res, 1002, '排班批次不存在', {}, 404);
+  if (!ensureStoreManager(req, res, batch)) return;
+  if (['pending_approval', 'approved', 'published'].includes(batch.status)) {
+    return fail(res, 1003, '当前批次状态不允许编辑', { status: batch.status }, 409);
+  }
 
   const { entries, ...rest } = req.body || {};
-  Object.assign(batch, rest, { updatedAt: now() });
+  Object.assign(batch, rest, {
+    status: 'draft',
+    validationStatus: batch.validationStatus === 'not_checked' ? 'not_checked' : 'warning',
+    requiresApproval: false,
+    submittedBy: null,
+    submittedAt: null,
+    publishedBy: null,
+    publishedAt: null,
+    updatedAt: now(),
+  });
   if (Array.isArray(entries)) {
     db.scheduleEntries = db.scheduleEntries.filter((item) => item.batchId !== batch.id);
     normalizeEntries(entries).forEach((item) => {
@@ -231,11 +265,13 @@ router.patch('/batches/:id', (req, res) => {
         batchId: batch.id,
         storeId: batch.storeId,
         createdBy: req.user.id,
-        status: batch.status,
+        status: 'draft',
         source: 'adjusted',
       }));
     });
   }
+
+  db.approvals = db.approvals.filter((item) => item.scheduleBatchId !== batch.id || item.status === 'approved');
 
   return success(res, buildBatchDetail(batch));
 });
@@ -246,28 +282,35 @@ router.get('/batches/:id', (req, res) => {
   return success(res, buildBatchDetail(batch));
 });
 
-router.post('/batches/:id/validate', (req, res) => {
+router.post('/batches/:id/validate', requirePermission('schedule:create', '员工不能校验排班'), (req, res) => {
+  const batch = getBatchById(req.params.id);
+  if (!batch) return fail(res, 1002, '排班批次不存在', {}, 404);
+  if (!ensureStoreManager(req, res, batch)) return;
   const result = validateBatch(req.params.id);
-  if (!result) return fail(res, 1002, '排班批次不存在', {}, 404);
   return success(res, result);
 });
 
-router.post('/batches/:id/submit-approval', (req, res) => {
+router.post('/batches/:id/submit-approval', requirePermission('schedule:create', '员工不能提交排班审批'), (req, res) => {
   const batch = getBatchById(req.params.id);
   if (!batch) return fail(res, 1002, '排班批次不存在', {}, 404);
+  if (!ensureStoreManager(req, res, batch)) return;
 
   if (batch.status === 'published') {
     return fail(res, 1003, '已发布批次不能再次提审');
   }
-
-  const existingPendingApproval = db.approvals.find((item) => item.scheduleBatchId === batch.id && item.status === 'pending');
-  if (existingPendingApproval) {
-    return success(res, {
-      batchId: batch.id,
-      approvalId: existingPendingApproval.id,
-      status: batch.status,
-      reused: true,
-    });
+  if (batch.status === 'pending_approval') {
+    const existingPendingApproval = db.approvals.find((item) => item.scheduleBatchId === batch.id && item.status === 'pending');
+    if (existingPendingApproval) {
+      return success(res, {
+        batchId: batch.id,
+        approvalId: existingPendingApproval.id,
+        status: batch.status,
+        reused: true,
+      });
+    }
+  }
+  if (batch.status === 'approved') {
+    return fail(res, 1003, '当前批次已审批通过，无需重复提审', { status: batch.status }, 409);
   }
 
   const store = getStoreById(batch.storeId);
@@ -286,6 +329,7 @@ router.post('/batches/:id/submit-approval', (req, res) => {
     updatedAt: now(),
   };
 
+  db.approvals = db.approvals.filter((item) => !(item.scheduleBatchId === batch.id && item.status === 'pending'));
   db.approvals.push(approval);
   batch.status = 'pending_approval';
   batch.submittedBy = req.user.id;
@@ -300,11 +344,22 @@ router.post('/batches/:id/submit-approval', (req, res) => {
   });
 });
 
-router.post('/batches/:id/publish', (req, res) => {
+router.post('/batches/:id/publish', requirePermission('schedule:publish', '员工不能发布排班'), (req, res) => {
   const batch = getBatchById(req.params.id);
   if (!batch) return fail(res, 1002, '排班批次不存在', {}, 404);
-
-  if (batch.requiresApproval && !['approved', 'published'].includes(batch.status)) {
+  if (!ensureStoreManager(req, res, batch)) return;
+  if (batch.status === 'published') {
+    return success(res, {
+      batchId: batch.id,
+      status: batch.status,
+      publishedAt: batch.publishedAt,
+      alreadyPublished: true,
+    });
+  }
+  if (batch.status === 'pending_approval') {
+    return fail(res, 1003, '审批中的批次不能直接发布', { status: batch.status }, 409);
+  }
+  if (batch.requiresApproval && batch.status !== 'approved') {
     return fail(res, 1003, '当前批次需审批后才能发布');
   }
 
@@ -365,9 +420,13 @@ router.get('/calendar', (req, res) => {
 router.get('/me', (req, res) => {
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
+  const requestedStatus = req.query.status;
+  const effectiveStatus = requestedStatus || (req.user.role === 'employee' ? 'published' : undefined);
+
   const list = db.scheduleEntries
     .filter((entry) => entry.userId === req.user.id)
     .filter((entry) => (!startDate || entry.scheduleDate >= startDate) && (!endDate || entry.scheduleDate <= endDate))
+    .filter((entry) => (!effectiveStatus || entry.status === effectiveStatus))
     .map((entry) => {
       const store = getStoreById(entry.storeId);
       const shift = getShiftById(entry.shiftId);
@@ -385,12 +444,13 @@ router.get('/me', (req, res) => {
       };
     });
 
-  return success(res, { userId: req.user.id, list });
+  return success(res, { userId: req.user.id, appliedStatus: effectiveStatus || null, list });
 });
 
-router.post('/batches/:id/duplicate', (req, res) => {
+router.post('/batches/:id/duplicate', requirePermission('schedule:create', '员工不能复制排班'), (req, res) => {
   const source = getBatchById(req.params.id);
   if (!source) return fail(res, 1002, '排班批次不存在', {}, 404);
+  if (!ensureStoreManager(req, res, source)) return;
 
   const batchId = db.counters.scheduleBatchId += 1;
   const duplicate = {

@@ -28,7 +28,25 @@ function requireAuth(req, res, next) {
   return next();
 }
 
+function hasPermission(user, permission) {
+  return Boolean(user?.permissions?.includes(permission));
+}
+
+function requirePermission(permission, message = '无权限执行该操作') {
+  return (req, res, next) => {
+    if (!req.user) {
+      return fail(res, 2001, '未登录或 token 无效', {}, 401);
+    }
+    if (!hasPermission(req.user, permission)) {
+      return fail(res, 2003, message, { requiredPermission: permission }, 403);
+    }
+    return next();
+  };
+}
+
 module.exports = {
   attachUser,
   requireAuth,
+  hasPermission,
+  requirePermission,
 };
