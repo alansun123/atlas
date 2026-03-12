@@ -23,7 +23,8 @@ Protected endpoints now use signed bearer tokens issued by the backend.
 
 ### Supported login paths
 
-- `POST /api/auth/wework/callback` — real-auth-first entry; resolves a WeCom identity via env-gated adapter/stub and returns either:
+- `GET /api/auth/wework/url` — returns the backend-generated WeCom OAuth URL plus current auth mode/config summary
+- `POST /api/auth/wework/callback` — real-auth-first entry; resolves a WeCom identity via credential-backed WeCom exchange when env is present, or via stub/env fallback otherwise, and returns either:
   - a signed session token for an active mapped Atlas user, or
   - `pendingAccess: true` for unmapped / inactive / unusable users
 - `POST /api/auth/mock-login` — explicit dev/demo fallback only
@@ -33,7 +34,11 @@ Protected endpoints now use signed bearer tokens issued by the backend.
 ```bash
 ATLAS_AUTH_TOKEN_SECRET=atlas-dev-secret-change-me
 ATLAS_AUTH_TOKEN_TTL_SECONDS=7200
-ATLAS_WECOM_AUTH_MODE=stub
+ATLAS_WECOM_AUTH_MODE=auto
+WECOM_CORP_ID=ww-your-corp-id
+WECOM_AGENT_ID=1000001
+WECOM_SECRET=your-wecom-secret
+WECOM_REDIRECT_URI=https://atlas.example.com/auth/wework/callback
 ATLAS_WECOM_CODE_MAP='{"demo-manager":{"weworkUserId":"manager_zhangsan","name":"张三"}}'
 ```
 
@@ -66,6 +71,7 @@ Non-zero `code` means business failure.
 
 ### Auth
 - `POST /api/auth/mock-login`
+- `GET /api/auth/wework/url`
 - `POST /api/auth/wework/callback`
 - `GET /api/auth/me`
 - `POST /api/auth/logout`

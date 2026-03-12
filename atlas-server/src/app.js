@@ -35,6 +35,7 @@ function createApp() {
       routes: [
         '/health',
         '/api/auth/mock-login',
+        '/api/auth/wework/url',
         '/api/auth/me',
         '/api/auth/logout',
         '/api/stores',

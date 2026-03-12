@@ -3,7 +3,7 @@ const { db } = require('../../stores');
 const { requireAuth, buildUserPayload, isUserUsable } = require('../../middlewares/auth');
 const { success, fail } = require('../../utils/response');
 const { issueAccessToken, DEFAULT_TTL_SECONDS } = require('../../services/auth-token');
-const { exchangeCodeForIdentity } = require('../../services/wework-auth');
+const { exchangeCodeForIdentity, buildWecomOauthUrl } = require('../../services/wework-auth');
 
 const router = express.Router();
 
@@ -70,6 +70,33 @@ function handleMockLogin(req, res) {
   }));
 }
 
+router.get('/wework/url', (req, res) => {
+  const resolved = buildWecomOauthUrl({
+    state: req.query.state,
+    redirectUri: req.query.redirectUri,
+  });
+
+  if (!resolved.ok) {
+    return fail(res, 2001, '企业微信授权地址配置不完整', {
+      reason: resolved.reason,
+      mode: resolved.mode,
+      missing: resolved.missing || [],
+    }, 503);
+  }
+
+  return success(res, {
+    url: resolved.url,
+    loginType: 'wecom',
+    mode: resolved.mode,
+    configuredMode: resolved.configuredMode,
+    corpId: resolved.corpId,
+    agentId: resolved.agentId,
+    redirectUri: resolved.redirectUri,
+    scope: resolved.scope,
+    state: resolved.state,
+  });
+});
+
 router.post('/mock-login', handleMockLogin);
 router.post('/mock/login', handleMockLogin);
 
@@ -86,6 +113,7 @@ router.post('/wework/callback', async (req, res) => {
       reason: resolved.reason,
       mode: resolved.mode || null,
       code,
+      detail: resolved.detail || null,
     }, 401);
   }
 
