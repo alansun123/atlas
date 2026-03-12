@@ -1,12 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppShell from '../../components/common/AppShell.vue'
-import { loginAs } from '../../stores/session'
+import { fetchWeComAuthUrl, isMockLoginEnabled, isWeComEnvironment } from '../../api/atlas'
+import { loginAs, sessionStore } from '../../stores/session'
 
 const router = useRouter()
-const loadingRole = ref<string>('')
+const loading = ref(false)
+const loadingRole = ref('')
 const error = ref('')
+const inWeCom = computed(() => isWeComEnvironment())
+const mockEnabled = isMockLoginEnabled()
+
+if (sessionStore.session?.user.role === 'pending') {
+  router.replace('/pending-access')
+} else if (sessionStore.session) {
+  router.replace('/home')
+}
+
+const startWeComLogin = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const authUrl = await fetchWeComAuthUrl()
+    window.location.href = authUrl
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '获取企业微信授权地址失败'
+    loading.value = false
+  }
+}
 
 const quickLogin = async (role: 'employee' | 'manager' | 'operation') => {
   loadingRole.value = role
@@ -23,19 +45,29 @@ const quickLogin = async (role: 'employee' | 'manager' | 'operation') => {
 </script>
 
 <template>
-  <AppShell title="Atlas" subtitle="门店智能排班系统 · 演示登录">
+  <AppShell title="Atlas" subtitle="门店智能排班系统 · 企业微信登录优先">
     <section class="card section-gap">
-      <p>优先走后端 <code>/api/auth/mock-login</code>；若后端不可用，其他页面仍保留必要前端 fallback/mock。</p>
-      <div class="stack-list">
-        <button class="primary-btn" :disabled="!!loadingRole" @click="quickLogin('employee')">以员工身份进入</button>
-        <button class="primary-btn" :disabled="!!loadingRole" @click="quickLogin('manager')">以店长身份进入</button>
-        <button class="primary-btn" :disabled="!!loadingRole" @click="quickLogin('operation')">以运营经理身份进入</button>
+      <div class="section-title-row">
+        <h3>企业微信登录</h3>
+        <small class="muted">{{ inWeCom ? '已检测到企业微信环境' : '当前不是企业微信内打开' }}</small>
       </div>
+      <p>
+        Sprint 2 起默认走真实企微授权链路。若当前不在企业微信内，建议从企业微信工作台重新打开；测试环境也可先尝试继续授权，若后端未提供授权地址则会显示明确报错。
+      </p>
+      <button class="primary-btn" :disabled="loading" @click="startWeComLogin">
+        {{ loading ? '正在跳转授权…' : '企业微信登录' }}
+      </button>
       <small v-if="error" style="color:#d33">{{ error }}</small>
     </section>
-    <section class="card muted-box">
-      <strong>测试说明</strong>
-      <p>登录态仍存本地 session，但会在启动时尝试调用 <code>/api/auth/me</code> 刷新当前用户信息。</p>
+
+    <section v-if="mockEnabled" class="card muted-box section-gap">
+      <strong>开发 / 演示兜底</strong>
+      <p>以下 mock 登录仅在显式开启 <code>VITE_ENABLE_MOCK_LOGIN=true</code> 时可用，不能作为真实联调验收路径。</p>
+      <div class="stack-list">
+        <button class="ghost-btn" :disabled="!!loadingRole || loading" @click="quickLogin('employee')">mock：以员工身份进入</button>
+        <button class="ghost-btn" :disabled="!!loadingRole || loading" @click="quickLogin('manager')">mock：以店长身份进入</button>
+        <button class="ghost-btn" :disabled="!!loadingRole || loading" @click="quickLogin('operation')">mock：以运营经理身份进入</button>
+      </div>
     </section>
   </AppShell>
 </template>

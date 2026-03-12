@@ -22,7 +22,8 @@ router.beforeEach((to) => {
 
   if (!sessionStore.ready) return true
   if (!role && !isPublic) return '/login'
-  if (role && to.path === '/login') return '/home'
+  if (role === 'pending' && to.path !== '/pending-access') return '/pending-access'
+  if (role && to.path === '/login') return role === 'pending' ? '/pending-access' : '/home'
   if (role && to.meta.roles && !(to.meta.roles as string[]).includes(role)) return '/home'
   return true
 })

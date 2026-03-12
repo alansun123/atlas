@@ -1,4 +1,4 @@
-import { apiRequest } from './client'
+import { apiRequest, ApiError, getApiBase } from './client'
 import { fetchApprovalDetail as fetchMockApprovalDetail, fetchApprovals as fetchMockApprovals, fetchEmployeeSchedule as fetchMockEmployeeSchedule, fetchHomeData } from './mock'
 import type { ApprovalItem, Role, ShiftItem, UserSession, ValidationIssue } from '../types'
 
@@ -7,6 +7,12 @@ const ROLE_TO_USER_ID: Record<'employee' | 'manager' | 'operation', number> = {
   manager: 101,
   operation: 201,
 }
+
+const APP_BASE_URL = (import.meta.env.VITE_APP_BASE_URL || window.location.origin).replace(/\/$/, '')
+const ENABLE_MOCK_LOGIN = String(import.meta.env.VITE_ENABLE_MOCK_LOGIN || 'false').toLowerCase() === 'true'
+const WECOM_CORP_ID = String(import.meta.env.VITE_WECOM_CORP_ID || '').trim()
+const WECOM_AGENT_ID = String(import.meta.env.VITE_WECOM_AGENT_ID || '').trim()
+const WECOM_REDIRECT_URI = String(import.meta.env.VITE_WECOM_REDIRECT_URI || `${APP_BASE_URL}/auth/callback`).trim()
 
 function startOfWeek(date = new Date()) {
   const current = new Date(date)
@@ -35,7 +41,7 @@ function weekRangeLabel(startDate: string, endDate: string) {
   return `${formatMonthDay(startDate)} - ${formatMonthDay(endDate)}`
 }
 
-function mapRole(role?: string): Role {
+export function mapRole(role?: string): Role {
   if (role === 'operation_manager') return 'operation'
   if (role === 'manager') return 'manager'
   if (role === 'employee') return 'employee'
@@ -51,17 +57,68 @@ function mapRoleLabel(role: Role) {
   }[role]
 }
 
-function normalizeSession(data: any): UserSession {
+export function normalizeSession(data: any): UserSession {
   const role = mapRole(data.user?.role)
   return {
-    token: String(data.accessToken),
+    token: String(data.accessToken || ''),
     user: {
-      id: String(data.user?.id ?? ''),
+      id: String(data.user?.id ?? data.user?.weworkUserId ?? ''),
       name: data.user?.name || '未知用户',
       role,
       roleLabel: mapRoleLabel(role),
-      storeName: data.user?.store?.name || '未分配门店',
+      storeName: data.user?.store?.name || data.user?.storeName || '未分配门店',
     },
+  }
+}
+
+export function isPendingAccessPayload(data: any) {
+  return Boolean(data?.pendingAccess) || mapRole(data?.user?.role) === 'pending'
+}
+
+export function isMockLoginEnabled() {
+  return ENABLE_MOCK_LOGIN
+}
+
+export function isWeComEnvironment(userAgent = navigator.userAgent) {
+  return /wxwork|wecom/i.test(userAgent)
+}
+
+function buildFrontendWeComAuthUrl() {
+  if (!WECOM_CORP_ID || !WECOM_AGENT_ID || !WECOM_REDIRECT_URI) return null
+
+  const redirectUri = encodeURIComponent(WECOM_REDIRECT_URI)
+  const state = encodeURIComponent(window.location.pathname === '/login' ? 'atlas_login' : `atlas_${Date.now()}`)
+  return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${encodeURIComponent(WECOM_CORP_ID)}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_base&state=${state}&agentid=${encodeURIComponent(WECOM_AGENT_ID)}#wechat_redirect`
+}
+
+export async function fetchWeComAuthUrl() {
+  try {
+    const data = await apiRequest<any>('/auth/wework/url')
+    const url = data?.url || data?.authUrl || data?.authorizeUrl
+    if (url) return String(url)
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 404) {
+      throw error
+    }
+  }
+
+  const url = buildFrontendWeComAuthUrl()
+  if (!url) {
+    throw new Error(`未获取到企业微信授权地址。请优先提供后端 /auth/wework/url，或配置 VITE_WECOM_CORP_ID / VITE_WECOM_AGENT_ID / VITE_WECOM_REDIRECT_URI。当前 API_BASE=${getApiBase()}`)
+  }
+  return url
+}
+
+export async function exchangeWeComCode(code: string, state?: string) {
+  const data = await apiRequest<any>('/auth/wework/callback', {
+    method: 'POST',
+    body: JSON.stringify({ code, state }),
+  })
+
+  return {
+    data,
+    session: normalizeSession(data),
+    pendingAccess: isPendingAccessPayload(data),
   }
 }
 
