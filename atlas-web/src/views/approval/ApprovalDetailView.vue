@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import StatusTag from '../../components/common/StatusTag.vue'
+import IntegrationNotice from '../../components/common/IntegrationNotice.vue'
 import { approveApproval, fetchApprovalDetailWithFallback, rejectApproval } from '../../api/atlas'
 import { formatStatusText } from '../../utils/helpers'
 
@@ -62,7 +63,9 @@ onMounted(load)
 <template>
   <AppShell title="审批详情" subtitle="查看触发规则、班表摘要与审批操作">
     <StateBlock v-if="loading" tone="loading" title="详情加载中" />
-    <StateBlock v-else-if="error" tone="error" title="详情加载失败" :description="error" />
+    <StateBlock v-else-if="error" tone="error" title="详情加载失败" :description="error">
+      <RouterLink class="ghost-btn inline-btn" to="/login">返回登录</RouterLink>
+    </StateBlock>
 
     <template v-else-if="detail">
       <section class="card section-gap">
@@ -76,9 +79,12 @@ onMounted(load)
         <small>{{ detail.comment }}</small>
       </section>
 
-      <section class="card section-gap">
-        <small class="muted">当前数据源：{{ detail.source === 'api' ? '后端接口' : '前端本地 fallback（仅显式开启）' }}</small>
-      </section>
+      <IntegrationNotice
+        class="section-gap"
+        :tone="detail.noticeTone"
+        :title="detail.source === 'api' ? '审批详情当前处于真实接口模式' : '审批详情当前处于 fallback 模式'"
+        :points="detail.noticePoints"
+      />
 
       <section class="card section-gap">
         <h3>触发规则</h3>
@@ -104,6 +110,7 @@ onMounted(load)
 
       <section v-if="actionMessage" class="card section-gap">
         <small>{{ actionMessage }}</small>
+        <small v-if="detail.source !== 'api'" class="muted">fallback 详情页不会触发真实审批写操作。</small>
       </section>
 
       <section class="bottom-actions">

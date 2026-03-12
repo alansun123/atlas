@@ -1,6 +1,7 @@
 import { apiRequest, ApiError, getApiBase } from './client'
 import { fetchApprovalDetail as fetchMockApprovalDetail, fetchApprovals as fetchMockApprovals, fetchEmployeeSchedule as fetchMockEmployeeSchedule, fetchHomeData } from './mock'
 import type { ApprovalItem, Role, ShiftItem, UserSession, ValidationIssue } from '../types'
+import { clearSession } from '../stores/session'
 
 const ROLE_TO_USER_ID: Record<'employee' | 'manager' | 'operation', number> = {
   employee: 102,
@@ -195,6 +196,36 @@ export async function fetchEmployeeScheduleWithFallback() {
   }
 }
 
+function getErrorMessage(error: unknown, fallbackLabel: string) {
+  if (error instanceof ApiError) {
+    if (error.status === 401 || error.status === 403) {
+      return `当前登录会话已失效（${error.status}）。请重新登录后再试。`
+    }
+    return `${fallbackLabel}失败：${error.message}`
+  }
+  return error instanceof Error ? error.message : `${fallbackLabel}失败`
+}
+
+function isAuthError(error: unknown) {
+  return error instanceof ApiError && (error.status === 401 || error.status === 403)
+}
+
+function fallbackReason(error: unknown, label: string) {
+  if (isAuthError(error)) {
+    return `${label}请求返回 401/403，前端已清空本地 session；当前 mock 数据不能作为真实联调成功证据。`
+  }
+  if (error instanceof ApiError) {
+    return `${label}请求失败：HTTP ${error.status} / ${error.message}`
+  }
+  return `${label}请求失败：${error instanceof Error ? error.message : '未知错误'}`
+}
+
+async function handleFallbackableError(error: unknown) {
+  if (isAuthError(error)) {
+    clearSession()
+  }
+}
+
 export async function fetchApprovalsWithFallback() {
   try {
     const [pending, all, me] = await Promise.all([
@@ -215,10 +246,16 @@ export async function fetchApprovalsWithFallback() {
       submittedAt: item.createdAt ? new Date(item.createdAt).toLocaleString('zh-CN') : '-',
       roleView: String(item.submittedBy) === me.id ? 'submitted' : (pendingIds.has(Number(item.id)) ? 'pending' : 'submitted'),
     }))
-    return { source: 'api' as const, items }
+    return { source: 'api' as const, items, noticeTone: 'good' as const, noticePoints: ['当前审批列表来自后端接口。', '如果真实会话失效，页面会显示明确错误而不是继续冒充成功。'] }
   } catch (error) {
-    if (!ENABLE_API_DATA_FALLBACK) throw error
-    return { source: 'mock' as const, items: await fetchMockApprovals() }
+    await handleFallbackableError(error)
+    if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '审批列表加载'))
+    return {
+      source: 'mock' as const,
+      items: await fetchMockApprovals(),
+      noticeTone: isAuthError(error) ? 'danger' as const : 'warn' as const,
+      noticePoints: [fallbackReason(error, '审批列表'), '当前页面展示的是前端 fallback 数据，仅用于演示。'],
+    }
   }
 }
 
@@ -237,10 +274,18 @@ export async function fetchApprovalDetailWithFallback(id: string) {
       triggers: detail.triggerReasons?.length ? detail.triggerReasons : ['后端未返回触发原因明细'],
       scheduleOverview: (batchDetail?.entries || []).map((entry: any) => `${formatMonthDay(entry.scheduleDate)} ${entry.shiftName}：${(entry.employees || []).map((e: any) => e.name).join('、') || '未排人'}`),
       history: [detail.approvedAt ? `已通过：${new Date(detail.approvedAt).toLocaleString('zh-CN')}` : '', detail.rejectedAt ? `已驳回：${new Date(detail.rejectedAt).toLocaleString('zh-CN')}` : ''].filter(Boolean),
+      noticeTone: 'good' as const,
+      noticePoints: ['当前审批详情来自后端接口。', '审批动作按钮只会在真实 API 数据下启用。'],
     }
   } catch (error) {
-    if (!ENABLE_API_DATA_FALLBACK) throw error
-    return { source: 'mock' as const, ...(await fetchMockApprovalDetail(id)) }
+    await handleFallbackableError(error)
+    if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '审批详情加载'))
+    return {
+      source: 'mock' as const,
+      ...(await fetchMockApprovalDetail(id)),
+      noticeTone: isAuthError(error) ? 'danger' as const : 'warn' as const,
+      noticePoints: [fallbackReason(error, '审批详情'), '当前页面展示的是前端 fallback 数据，审批按钮会保持禁用。'],
+    }
   }
 }
 
