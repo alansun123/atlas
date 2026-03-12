@@ -31,6 +31,15 @@ Protected endpoints now use signed bearer tokens issued by the backend.
 
 ### Dev env knobs
 
+For real-environment readiness, run:
+
+```bash
+npm run check:wecom-env
+```
+
+It will fail closed (`READY_FOR_REAL_AUTH_ENV_CHECK=false`) when the backend is still not truly ready for a real WeCom acceptance run.
+
+
 ```bash
 ATLAS_AUTH_TOKEN_SECRET=atlas-dev-secret-change-me
 ATLAS_AUTH_TOKEN_TTL_SECONDS=7200
