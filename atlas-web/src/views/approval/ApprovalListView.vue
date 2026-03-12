@@ -60,6 +60,10 @@ watch(() => route.query.tab, load)
 
 <template>
   <AppShell title="审批列表" subtitle="特殊排班审批流演示">
+    <div v-if="!loading && !error && source === 'mock'" class="fallback-banner">
+      <span class="fallback-badge">⚠️ FALLBACK / MOCK</span>
+      <span>当前数据为本地 mock，不代表真实 API 已联通</span>
+    </div>
     <nav class="tab-row section-gap">
       <RouterLink to="/approvals">待审批</RouterLink>
       <RouterLink to="/approvals?tab=approved">已通过</RouterLink>

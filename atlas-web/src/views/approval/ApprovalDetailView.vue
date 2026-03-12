@@ -75,6 +75,10 @@ onMounted(load)
 
 <template>
   <AppShell title="审批详情" subtitle="查看触发规则、班表摘要与审批操作">
+    <div v-if="detail && detail.source === 'mock'" class="fallback-banner">
+      <span class="fallback-badge">⚠️ FALLBACK / MOCK</span>
+      <span>当前详情为本地 mock，审批操作已禁用</span>
+    </div>
     <StateBlock v-if="loading" tone="loading" title="详情加载中" description="正在确认审批详情、审批历史与关联班表摘要。" />
     <StateBlock v-else-if="loadError" tone="error" title="详情加载失败" :description="loadError">
       <div class="section-title-row">
