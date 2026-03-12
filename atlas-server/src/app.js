@@ -8,7 +8,7 @@ const schedulesRouter = require('./modules/schedules');
 const leavesRouter = require('./modules/leaves');
 const approvalsRouter = require('./modules/approvals');
 const { attachUser } = require('./middlewares/auth');
-const { fail } = require('./utils/response');
+const { fail, success } = require('./utils/response');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,20 +17,30 @@ app.use(express.json());
 app.use(attachUser);
 
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Atlas backend is running',
+  return success(res, {
+    service: 'atlas-server',
     version: 'mock-mvp',
+    currentUser: req.user || null,
     routes: [
       '/health',
-      '/api/auth',
+      '/api/auth/mock-login',
+      '/api/auth/me',
+      '/api/auth/logout',
       '/api/stores',
+      '/api/stores/:id/shifts',
       '/api/employees',
-      '/api/store_staffs',
-      '/api/schedules',
-      '/api/leaves',
-      '/api/approvals',
+      '/api/schedules/batches',
+      '/api/schedules/batches/:id',
+      '/api/schedules/batches/:id/validate',
+      '/api/schedules/batches/:id/submit-approval',
+      '/api/schedules/batches/:id/publish',
+      '/api/schedules/me',
+      '/api/approvals/pending',
+      '/api/approvals/:id',
+      '/api/approvals/:id/approve',
+      '/api/approvals/:id/reject',
     ],
-  });
+  }, 'Atlas backend mock API is running');
 });
 
 app.use('/health', healthRouter);

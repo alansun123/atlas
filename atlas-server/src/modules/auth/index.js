@@ -5,7 +5,14 @@ const { success, fail } = require('../../utils/response');
 
 const router = express.Router();
 
-router.post('/mock/login', (req, res) => {
+function buildUserPayload(user) {
+  return {
+    ...user,
+    store: getStoreById(user.primaryStoreId) || null,
+  };
+}
+
+function handleMockLogin(req, res) {
   const { userId, weworkUserId, code } = req.body || {};
 
   const user = db.users.find((item) => (
@@ -19,14 +26,15 @@ router.post('/mock/login', (req, res) => {
 
   return success(res, {
     accessToken: String(user.id),
+    tokenType: 'Bearer',
     expiresIn: 7200,
     loginType: code ? 'mock-wework-code' : 'mock-user-id',
-    user: {
-      ...user,
-      store: getStoreById(user.primaryStoreId) || null,
-    },
+    user: buildUserPayload(user),
   });
-});
+}
+
+router.post('/mock-login', handleMockLogin);
+router.post('/mock/login', handleMockLogin);
 
 router.post('/wework/callback', (req, res) => {
   const { code } = req.body || {};
@@ -38,18 +46,19 @@ router.post('/wework/callback', (req, res) => {
 
   return success(res, {
     accessToken: String(fallbackUser.id),
+    tokenType: 'Bearer',
     expiresIn: 7200,
     code,
     mocked: true,
-    user: {
-      ...fallbackUser,
-      store: getStoreById(fallbackUser.primaryStoreId) || null,
-    },
+    user: buildUserPayload(fallbackUser),
   });
 });
 
 router.get('/me', requireAuth, (req, res) => success(res, req.user));
 
-router.post('/logout', requireAuth, (_req, res) => success(res, { success: true }));
+router.post('/logout', requireAuth, (req, res) => success(res, {
+  success: true,
+  loggedOutUserId: req.user.id,
+}));
 
 module.exports = router;

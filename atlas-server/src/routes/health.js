@@ -1,12 +1,12 @@
 const express = require('express');
+const { success } = require('../utils/response');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.status(200).json({
+router.get('/', (_req, res) => {
+  return success(res, {
     status: 'ok',
     service: 'atlas-server',
-    timestamp: new Date().toISOString(),
   });
 });
 
