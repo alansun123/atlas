@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import StatusTag from '../../components/common/StatusTag.vue'
-import { fetchHomeData } from '../../api/mock'
+import { fetchHomeDataWithFallback } from '../../api/atlas'
 import { logout, sessionStore } from '../../stores/session'
 import { todayText } from '../../utils/helpers'
 
@@ -17,7 +17,7 @@ const user = computed(() => sessionStore.session?.user)
 onMounted(async () => {
   try {
     if (!user.value || user.value.role === 'pending') return
-    const data = await fetchHomeData(user.value.role)
+    const data = await fetchHomeDataWithFallback(user.value.role)
     cards.value = data.cards
     shortcuts.value = data.shortcuts
     todos.value = data.todos
@@ -52,7 +52,10 @@ onMounted(async () => {
       </section>
 
       <section class="card section-gap">
-        <h3>快捷入口</h3>
+        <div class="section-title-row">
+          <h3>快捷入口</h3>
+          <small class="muted">首页指标仍为前端 fallback mock</small>
+        </div>
         <div class="stack-list">
           <component
             v-for="shortcut in shortcuts"

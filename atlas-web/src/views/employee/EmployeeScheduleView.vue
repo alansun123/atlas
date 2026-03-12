@@ -4,7 +4,7 @@ import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import StatusTag from '../../components/common/StatusTag.vue'
 import WeekSwitcher from '../../components/schedule/WeekSwitcher.vue'
-import { fetchEmployeeSchedule } from '../../api/mock'
+import { fetchEmployeeScheduleWithFallback } from '../../api/atlas'
 import { formatStatusText } from '../../utils/helpers'
 
 const loading = ref(true)
@@ -15,7 +15,7 @@ const load = async () => {
   loading.value = true
   error.value = ''
   try {
-    data.value = await fetchEmployeeSchedule()
+    data.value = await fetchEmployeeScheduleWithFallback()
   } catch (err) {
     error.value = err instanceof Error ? err.message : '班表加载失败'
   } finally {
@@ -50,6 +50,7 @@ onMounted(load)
           <h3>本周班表</h3>
           <a class="ghost-btn inline-btn" href="https://work.weixin.qq.com/" target="_blank">去企微请假</a>
         </div>
+        <small class="muted">当前优先读取后端 <code>/api/schedules/me</code>；接口失败时回退本地 mock。</small>
         <div v-if="data.shifts.length" class="stack-list">
           <article v-for="shift in data.shifts" :key="shift.id" class="list-row">
             <div>

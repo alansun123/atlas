@@ -1,33 +1,42 @@
 import { reactive } from 'vue'
 import type { Role, UserSession } from '../types'
+import { fetchMe, loginWithMockRole } from '../api/atlas'
 
 const STORAGE_KEY = 'atlas_demo_session'
-
-const roles: Record<Exclude<Role, 'pending'>, Omit<UserSession, 'token'>> = {
-  employee: {
-    user: { id: 'u_emp_1', name: '林小满', role: 'employee', roleLabel: '员工', storeName: '静安寺店' },
-  },
-  manager: {
-    user: { id: 'u_mgr_1', name: '周店长', role: 'manager', roleLabel: '店长', storeName: '静安寺店' },
-  },
-  operation: {
-    user: { id: 'u_op_1', name: '陈运营', role: 'operation', roleLabel: '运营经理', storeName: '华东大区' },
-  },
-}
 
 export const sessionStore = reactive<{ ready: boolean; session: UserSession | null }>({
   ready: false,
   session: null,
 })
 
-export function bootstrapSession() {
+export async function bootstrapSession() {
   const raw = localStorage.getItem(STORAGE_KEY)
   sessionStore.session = raw ? JSON.parse(raw) : null
+
+  if (sessionStore.session?.token) {
+    try {
+      const me = await fetchMe()
+      sessionStore.session = {
+        token: sessionStore.session.token,
+        user: {
+          id: me.id,
+          name: me.name,
+          role: me.role,
+          roleLabel: me.roleLabel,
+          storeName: me.storeName,
+        },
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionStore.session))
+    } catch {
+      // 保留已缓存 session，允许前端 fallback/mock 继续工作
+    }
+  }
+
   sessionStore.ready = true
 }
 
-export function loginAs(role: Exclude<Role, 'pending'>) {
-  const session: UserSession = { token: `mock-${role}-token`, ...roles[role] }
+export async function loginAs(role: Exclude<Role, 'pending'>) {
+  const session = await loginWithMockRole(role)
   sessionStore.session = session
   localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
   return session
