@@ -1,5 +1,5 @@
 const express = require('express');
-const { db, getStoreById } = require('../../stores');
+const { db, getStoreById, getUserById, createUser, createStoreStaff } = require('../../stores');
 const { requireAuth } = require('../../middlewares/auth');
 const { success, fail } = require('../../utils/response');
 const { containsKeyword, paginate, toInt } = require('../../utils/helpers');
@@ -43,10 +43,8 @@ router.post('/', (req, res) => {
   const { name, role = 'employee', storeId, mobile = '', joinedAt = new Date().toISOString(), status = 'active' } = req.body || {};
   if (!name || !storeId) return fail(res, 1001, 'name 和 storeId 为必填字段');
 
-  const id = db.counters.employeeId += 1;
-  const user = {
-    id,
-    weworkUserId: `mock_${id}`,
+  const user = createUser({
+    weworkUserId: `mock_${db.counters.employeeId += 1}`,
     name,
     mobile,
     role,
@@ -54,13 +52,11 @@ router.post('/', (req, res) => {
     joinedAt,
     permissions: role === 'employee' ? ['schedule:read:self'] : ['store:read', 'employee:read', 'schedule:create'],
     primaryStoreId: Number(storeId),
-  };
+  });
 
-  db.users.push(user);
-  db.storeStaffs.push({
-    id: db.counters.storeStaffId += 1,
+  createStoreStaff({
     storeId: Number(storeId),
-    userId: id,
+    userId: user.id,
     isPrimary: true,
     status: 'active',
     joinedAt,
@@ -70,7 +66,7 @@ router.post('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  const user = db.users.find((item) => item.id === Number(req.params.id));
+  const user = getUserById(req.params.id);
   if (!user) return fail(res, 1002, '员工不存在', {}, 404);
   return success(res, toEmployeeView(user));
 });

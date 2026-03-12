@@ -1,5 +1,5 @@
 const express = require('express');
-const { db } = require('../../stores');
+const { db, createStoreStaff } = require('../../stores');
 const { requireAuth } = require('../../middlewares/auth');
 const { success, fail } = require('../../utils/response');
 
@@ -24,15 +24,13 @@ router.post('/', (req, res) => {
   const { storeId, userId, isPrimary = true, status = 'active', joinedAt = new Date().toISOString() } = req.body || {};
   if (!storeId || !userId) return fail(res, 1001, 'storeId 和 userId 为必填字段');
 
-  const relation = {
-    id: db.counters.storeStaffId += 1,
+  const relation = createStoreStaff({
     storeId: Number(storeId),
     userId: Number(userId),
     isPrimary: Boolean(isPrimary),
     status,
     joinedAt,
-  };
-  db.storeStaffs.push(relation);
+  });
   return success(res, relation, 'created', 201);
 });
 

@@ -1,4 +1,5 @@
 const express = require('express');
+const { initDatabase, seedInitialData } = require('./data/db');
 const healthRouter = require('./routes/health');
 const authRouter = require('./modules/auth');
 const storesRouter = require('./modules/stores');
@@ -11,6 +12,9 @@ const { attachUser } = require('./middlewares/auth');
 const { fail, success } = require('./utils/response');
 
 function createApp() {
+  initDatabase();
+  seedInitialData();
+
   const app = express();
 
   app.use((req, res, next) => {

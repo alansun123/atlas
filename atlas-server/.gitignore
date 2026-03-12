@@ -1,3 +1,7 @@
 node_modules/
 .env
 .DS_Store
+data/atlas.db
+data/atlas.db-*
+src/data/atlas.db
+src/data/atlas.db-*
