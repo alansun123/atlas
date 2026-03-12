@@ -1,6 +1,7 @@
 # Atlas Sprint 2 Backend Gap Note: WeCom OAuth + Local User Mapping
 
-_Last updated: 2026-03-12_
+_Last updated: 2026-03-12 22:30 GMT+8_
+_Current baseline: `ab73640`_
 
 ## Scope
 
@@ -32,7 +33,7 @@ Observed behavior:
   - `x-mock-user-id: <userId>`
 - token is not signed, not encrypted, and not stateful; it is just a numeric local user id.
 - `POST /api/auth/mock-login` returns `accessToken = String(user.id)`.
-- `POST /api/auth/wework/callback` is no longer planning-wise "placeholder-only"; current repo reality already includes a real-auth-first callback direction plus executable acceptance probing, but real-environment acceptance is still pending.
+- `POST /api/auth/wework/callback` 已实现 stub/integration pass，包含 real-mode exchange boundary 和 pendingAccess 分支，真实环境验收待完成。
 - `GET /api/auth/me` still remains part of the auth acceptance chain and must be verified in a real environment after callback and refresh.
 - `POST /api/auth/logout` still needs to behave deterministically as part of acceptance evidence.
 

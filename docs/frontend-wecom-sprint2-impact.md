@@ -1,7 +1,8 @@
 # Atlas Frontend Impact Note — Sprint 2 WeCom 登录首波接入
 
-更新时间：2026-03-12  
-范围：**仅前端 / H5 集成视角**，不涉及后端业务逻辑改造方案。
+> 更新时间：2026-03-12 22:30 GMT+8
+> 当前基线：`ab73640`
+> 范围：**仅前端 / H5 集成视角**，不涉及后端业务逻辑改造方案。
 
 ---
 
@@ -9,7 +10,7 @@
 
 ### 1.1 登录 / 会话 / 路由现状
 
-当前登录链路已从纯 Sprint 1 mock 形态明显前进，但**仍存在会掩盖真实联调结果的 mock/fallback 残留**：
+**当前前端已进入 real-auth-first 登录骨架阶段**，主要风险已从"mock-first 登录骨架未建立"转为"业务页 fallback 仍可能掩盖真实联调问题"：
 
 - `src/views/common/LoginView.vue`
   - 不应再被描述为纯“三角色 mock 入口页”；当前规划重点是继续巩固 real-auth-first 入口，并把 mock 入口限制在 dev/demo 语义
