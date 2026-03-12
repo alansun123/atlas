@@ -1,9 +1,9 @@
 # Atlas Tech Lead Source of Truth — Sprint 2 acceptance, sequencing, and ownership
 
 > 单一事实源（single source of truth）  
-> 更新时间：2026-03-12  
+> 更新时间：2026-03-12 20:25 GMT+8  
 > 维护角色：Tech Lead  
-> 当前基线：`fc87dd5` on `main`  
+> 当前基线：`02046d0` on `techlead/watchdog-followup-20260312`  
 > 适用范围：Tech Lead / PM / Backend / Frontend / QA / Ops
 
 ## 1. Executive status
@@ -14,7 +14,7 @@ The following items are **done** on the current baseline and must **not** be tra
 - **Sprint 1 mock MVP** = completed, demo-ready  
   Reference: `docs/qa-final-mock-retest-2026-03-12.md`
 - **Approval-detail hardening / approval RBAC / duplicate-state guards** = completed for the intended mock-MVP scope  
-  Reference: `docs/qa-approval-hardening-retest-2026-03-12.md`, backend hardening in `de1049b`, frontend approval-detail hardening in `fc87dd5`
+  Reference: `docs/qa-approval-hardening-retest-2026-03-12.md`
 - **Frontend login/callback/session polish for real-auth-first skeleton** = materially advanced and no longer the primary planning gap  
   Current reality: login path is real-auth-first, callback exchanges code, session failure paths are more explicit than before
 
@@ -33,12 +33,14 @@ This is the planning truth after the latest repo state:
 - backend auth contract is already at **stub/integration PASS**
 - approval workflow hardening is already landed
 - frontend approval/session failure handling is already improved
+- backend now also provides an **executable acceptance probe** for real-auth evidence capture
 - the remaining gap is **environment-backed acceptance + removal/exposure of masking behavior**
 
 References:
 - `docs/qa-wecom-auth-watchdog-2026-03-12.md`
 - `docs/qa-approval-hardening-retest-2026-03-12.md`
 - `docs/qa-final-mock-retest-2026-03-12.md`
+- `docs/backend-wecom-real-auth-acceptance.md`
 
 ---
 
@@ -60,6 +62,7 @@ Sprint 2 auth is only accepted when **all** items below are true in a real envir
    - manager
    - operation manager
 6. The callback environment, app config, and redirect domain are all confirmed compatible with the actual WeCom tenant.
+7. At least one real acceptance run is captured with the backend acceptance probe or equivalent evidence bundle defined in `docs/backend-wecom-real-auth-acceptance.md`.
 
 ### 2.2 Fallback-risk acceptance
 Frontend is only acceptable for Sprint 2 real-login mode when **all** items below are true:
@@ -102,6 +105,7 @@ Required outputs:
   - manager
   - operation manager
 - confirmed `weworkUserId -> Atlas user` mapping for each identity
+- a runnable backend probe command with actual environment values and, when available, real callback codes
 
 Exit condition:
 - the team can run one real login -> callback -> `/auth/me` acceptance pass without inventing missing environment pieces mid-flight
@@ -115,6 +119,7 @@ Required checks:
 3. callback returns `pendingAccess` for unmapped/inactive user
 4. signed session/token survives refresh through `/api/auth/me`
 5. logout / invalid-session branch behaves deterministically
+6. the executable acceptance probe output is recorded as evidence, not just manual screenshots
 
 Exit condition:
 - one documented real acceptance run exists with evidence for success path and `pendingAccess` path
@@ -203,6 +208,7 @@ Owns:
 - `/api/auth/me` continuity
 - user mapping validation
 - deterministic auth/logout/session behavior
+- acceptance probe execution and artifact capture
 
 Does not own:
 - hiding environment incompleteness behind stub success
@@ -235,7 +241,7 @@ Does not own:
 ### Do now
 1. **Use this file as the authoritative Tech Lead planning artifact.**
 2. **Assign Ops + Backend immediately** to prepare the real WeCom acceptance environment.
-3. **Run one evidenced real auth acceptance pass** before any broader Sprint 2 expansion.
+3. **Run one evidenced real auth acceptance pass** — preferably via the backend acceptance probe defined in `docs/backend-wecom-real-auth-acceptance.md`.
 4. **Then assign Frontend** to tighten or expose fallback on the four key paths.
 5. **Then run QA auth-first retest** in the same order defined above.
 
@@ -263,6 +269,14 @@ Those files may still contain useful detail, but if wording conflicts with this 
 ## 7. Next role-appropriate step
 
 **Ops + Backend, jointly.**
+
+Exact next sequence:
+1. finalize real env + redirect alignment
+2. reserve real mapped + pending-access test identities
+3. run `npm run check:wecom-env`
+4. run `npm run probe:wecom-acceptance` with real env / callback codes
+5. write back the evidence bundle
+6. only then hand off Frontend to remove or expose masking fallback
 
 Why:
 - the main open P0 is no longer missing Sprint 1 closure or approval hardening

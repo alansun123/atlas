@@ -1,101 +1,73 @@
 # Atlas Sprint 1 Mock MVP Watchdog
 
-> 单一事实源（single source of truth）
+> 单一事实源（historical closure note）
 >
-> 更新时间：2026-03-12 18:52 GMT+8  
+> 更新时间：2026-03-12 20:25 GMT+8  
 > 维护角色：Tech Lead / Watchdog  
-> 基线提交：`54ec2b8`（后端 hardening 已落地；前端 approval-detail hardening 参考 `b577c31`）
+> 当前基线：`02046d0`
 
 ## 1. 当前判断
 
-**Sprint 1 现在应按“mock MVP 可演示收口”管理，最终 gate 是 mock E2E retest，而不是真实 WeCom 登录交付。**
+**Sprint 1 mock MVP 已完成，并已被 QA/retest 证实为 demo-ready。这个文件不再用于追踪活跃 P0，只保留为 Sprint 1 关闭说明。**
 
-和早期 `README.md`、`SPRINT1.md` 相比，仓库现实已经进一步收敛：
+以当前仓库现实看，下面这些曾经的 Sprint 1 风险都已经关闭，不应继续作为催办事项：
 
-- 前端 `atlas-web/` 已存在且已进入 mock backend 联调阶段
-- 后端 mock API 主链路可跑通
-- 后端 RBAC / approval flow hardening 已落地（`54ec2b8`）
-- 前端 approval detail / mock flow hardening 已落地（`b577c31`）
-- **当前剩余 Sprint 1 gate：一轮基于当前代码的最终 mock E2E / QA retest**
-- WeCom 集成仍应明确放入 Sprint 2 kickoff
+- 前端不存在 / 未进入联调
+- 后端 mock 主链路未跑通
+- approval detail 仍待补齐
+- RBAC 仍只靠前端隐藏按钮
+- 审批/发布状态机仍缺防线
+- Sprint 1 还需要 final mock retest 才能判断是否可演示
 
-## 2. Sprint 1 实际完成度（按当前基线）
+当前正确口径应统一为：
 
-### 2.1 已完成 / 已进入“待最终回归确认”
-- [x] 前端工程存在，且已进入联调
-- [x] 后端 mock API 可启动并承接主链路
-- [x] mock 登录 / `GET /api/auth/me` 可支撑演示
+- **Sprint 1 = mock MVP completed / demo-ready**
+- **approval-detail / RBAC / state-machine hardening = closed**
+- **当前活跃 P0 已切换到 Sprint 2 real WeCom acceptance**
+
+参考依据：
+- `docs/qa-final-mock-retest-2026-03-12.md`
+- `docs/qa-approval-hardening-retest-2026-03-12.md`
+- `docs/tech-lead-sprint2-source-of-truth-2026-03-12.md`
+
+## 2. Sprint 1 已关闭的交付结论
+
+### 2.1 已成立
+- [x] 员工 / 店长 / 运营经理三角色 mock 演示链路可跑通
 - [x] 店长排班批次创建 / 校验 / 提审主链路可跑
-- [x] 运营经理待审批列表、审批通过 / 驳回接口存在
-- [x] 发布排班接口存在
-- [x] 前端已存在 `/login` `/home` `/employee/schedule` `/manager/schedule` `/approvals` `/approvals/:id` `/pending-access`
-- [x] 后端 RBAC 已收口到接口层，不再仅依赖前端隐藏按钮
-- [x] 审批 / 发布状态流已按 Sprint 1 mock 口径收紧
-- [x] 审批详情页与 mock flow hardening 已完成开发侧修补
+- [x] 运营经理待审批列表、审批详情、通过 / 驳回链路可跑
+- [x] 店长可在审批通过后发布排班
+- [x] 员工可查看已发布班表
+- [x] approval detail hardening 已落地并完成回归
+- [x] 后端 RBAC / 状态机 hardening 已落地并完成回归
+- [x] Sprint 1 mock MVP 已具备现场演示条件
 
-### 2.2 Sprint 1 仍未关闭
-- [ ] 需要一轮最终 mock E2E retest，把上述 hardening 在真实联调路径上再确认一次
-- [ ] 需要把 retest 结果写回 smoke / QA 文档，形成“现在是否可演示”的结论
-- [ ] WeCom 集成仍停留在 Sprint 2 计划层，不属于本 Sprint 阻塞项
+### 2.2 不再属于 Sprint 1 blocker
+- [x] WeCom 集成不属于 Sprint 1 gate
+- [x] approval-detail / RBAC / state-machine 不再属于活跃 P0
+- [x] final mock E2E retest 不再是待办项；其结论已经体现在 QA 文档中
 
-## 3. Sprint 1 验收口径
+## 3. 现在不该再怎么描述 Sprint 1
 
-只有下面 4 条同时成立，Sprint 1 才应被标记为“mock MVP 可演示完成”：
+以下表述在 `02046d0` 基线下都应视为过期：
 
-1. **员工 / 店长 / 运营经理三角色能跑通一轮真实 mock 演示**
-2. **审批详情页能稳定打开、展示、执行审批并刷新最新状态**
-3. **RBAC / 状态机回归通过：越权与错误状态迁移都会被拦截**
-4. **文档口径已统一为：Sprint 1 = mock MVP；WeCom 真集成 = Sprint 2**
+- “Sprint 1 仍待最终 mock retest。”
+- “Sprint 1 仍未关闭。”
+- “approval detail 还是未完成项。”
+- “RBAC / 状态机 hardening 仍需作为当前 P0 追踪。”
+- “下一步应该继续冲 Sprint 1 mock 收口。”
 
-## 4. 唯一剩余 P0：Final mock E2E retest
+## 4. 正确的衔接关系
 
-必须重测的最小链路：
+Sprint 1 关闭后，唯一合理的规划衔接是：
 
-- [ ] 员工：登录 -> 首页 -> 我的班表
-- [ ] 店长：登录 -> 排班页 -> 生成/查看批次 -> 校验 -> 提交审批
-- [ ] 运营经理：登录 -> 审批列表 -> 审批详情 -> 通过/驳回
-- [ ] 店长：审批通过后 -> 发布排班
-- [ ] 员工：重新进入我的班表 -> 看到已发布班次
+1. **Ops + Backend**：准备真实 WeCom 环境并运行 acceptance probe
+2. **Backend**：记录真实 success / pendingAccess / `/api/auth/me` 连续性证据
+3. **Frontend**：收紧或显式暴露关键页面 fallback，避免掩盖真实 auth/API 失败
+4. **QA**：按 auth-first 顺序复验真实登录链路，再看业务链路
 
-回归时必须额外记录：
+## 5. 结论
 
-- [ ] 实际使用的 `batchId / approvalId / userId`
-- [ ] 审批详情页在 `pending / approved / rejected / 不存在 id` 下的表现
-- [ ] 越权 case：员工创建/发布、店长审批、无 token、错误 id
-- [ ] 状态机 case：重复提审、绕过审批直接发布、重复审批/重复发布
-- [ ] 每一步是否命中真实 API 还是 fallback
+本文件之后，Sprint 1 的 Watchdog 结论应固定为：
 
-交付产物要求：
-
-- [ ] 更新最终 smoke / QA 结果文档
-- [ ] 结论必须明确回答：**“现在还能不能现场演示？”**
-
-## 5. Sprint 2：WeCom integration planning
-
-Sprint 2 应明确以 WeCom 真集成为 kickoff，而不是继续把它写成模糊远期项。
-
-### 5.1 前置项
-- 企业微信应用信息：`CorpID / AgentID / Secret`
-- 前端回调地址、后端回调域名与环境配置
-- `weworkUserId -> Atlas user` 映射规则
-- 未开通用户进入 `/pending-access` 的承接策略
-- 测试企业环境、测试账号、联调网络可用性
-
-### 5.2 Sprint 2 首波任务
-1. 接入 WeCom OAuth 登录
-2. 完成本地用户映射 / 登录态 / 权限初始化
-3. 接入基础持久化与必要配置管理
-4. 补最小联调验证：登录、回调、用户识别、待开通兜底
-
-### 5.3 暂不作为 Sprint 2 首波阻塞
-- 真实请假同步全量闭环
-- 审批回写 WeCom
-- 企业微信消息通知完善
-
-## 6. 本轮文档收口结论
-
-本文件之后，Sprint 1 的 Tech Lead 判断应统一为：
-
-- **不是继续派开发做“真实 WeCom 登录冲刺”**
-- **也不是继续把 RBAC / approval detail 当未开发事项追人**
-- **而是把 QA retest 跑完，并用结果决定 Sprint 1 是否正式关门**
+> **Sprint 1 mock MVP 已完成；当前不应再把 Sprint 1 收口或 approval hardening 伪装成活跃 P0。团队下一步应直接进入 Sprint 2 real WeCom acceptance。**

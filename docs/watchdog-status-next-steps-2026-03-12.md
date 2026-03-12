@@ -1,9 +1,9 @@
 # Atlas Watchdog Status + Next Steps
 
 > 单一事实源（single source of truth）
-> 更新时间：2026-03-12
+> 更新时间：2026-03-12 20:25 GMT+8
 > 维护角色：Tech Lead / Watchdog
-> 当前基线：`3086e2e` on `main`
+> 当前基线：`02046d0` on `techlead/watchdog-followup-20260312`
 
 ## 1. 当前真实状态
 
@@ -30,7 +30,7 @@
 - 剩余问题已不再是 Sprint 1 P0 blocker，而是 Sprint 2 联调质量问题。
 
 #### Sprint 2 WeCom auth 第一刀（后端合同层）
-**后端 auth contract 已从“缺接口/纯占位”推进到“stub/integration pass”。**
+**后端 auth contract 已从“缺接口/纯占位”推进到“stub/integration pass”，并且已经有可执行 acceptance probe。**
 
 依据：`docs/qa-wecom-auth-watchdog-2026-03-12.md` + 当前代码检查
 
@@ -43,11 +43,12 @@
 - `GET /api/auth/me` 已走签名 token 验证链路。
 - `POST /api/auth/logout` 已给出明确 stateless contract。
 - `atlas-server/.env.example` 的 WeCom 关键配置契约已补齐。
-- `npm run test:auth` + 前端 build 已通过。
+- `npm run test:auth` 已通过。
+- `npm run check:wecom-env` / `npm run probe:wecom-acceptance` 已存在，可用于真实环境验收证据收集。
 
 结论：
 - **Sprint 2 auth 第一刀后端“合同与烟测”已完成。**
-- 未完成的是“真实环境验收”，不是“后端接口还没定义”。
+- **现在缺的是“真实环境验收跑通并留证”，不是“后端接口还没定义”。**
 
 ---
 
@@ -60,6 +61,7 @@
 - 真实 `CorpID / AgentID / Secret`
 - 可访问的 callback 域名/环境
 - 真实测试账号与角色映射
+- 至少一组可用于 acceptance probe 的真实 callback code / 证据采集流程
 
 所以当前状态应写成：
 - **stub/integration PASS**
@@ -96,7 +98,7 @@
 
 ## 3. Sprint 2 推荐执行顺序（按角色）
 
-### Phase 1 — Tech Lead / PM：先冻结验收口径
+### Phase 1 — Tech Lead / PM：冻结验收口径，不再回滚到旧叙事
 先统一一句话，不再让团队各自理解：
 - Sprint 1 = **done for mock demo**
 - Sprint 2 当前入口 = **真实 WeCom 登录验收 + 关闭前端静默 fallback 风险**
@@ -106,17 +108,21 @@ Tech Lead 本阶段输出应包括：
 - 前端“哪些页面在真实登录模式下禁止静默 fallback”的边界
 - backend / frontend / QA 的联调顺序与 owner
 
-### Phase 2 — Ops / Backend：先拿真实环境，再跑 auth E2E
+### Phase 2 — Ops / Backend：先拿真实环境，再跑 acceptance probe
 先做环境，不要先扩业务页。
 
 顺序：
 1. 准备真实 WeCom 测试配置与 callback 环境
 2. 准备 3 个真实测试身份：店长 / 员工 / 运营经理
-3. 校验 `weworkUserId -> Atlas user` 映射
-4. 用真实环境跑一轮：授权地址 -> callback -> token -> `/auth/me` -> pending-access/角色落页
+3. 准备 1 个未开通或 inactive 身份用于 `pendingAccess`
+4. 校验 `weworkUserId -> Atlas user` 映射
+5. 先跑 `npm run check:wecom-env`
+6. 再跑 `npm run probe:wecom-acceptance`
+7. 回写 success / pendingAccess / `/auth/me` / 401 evidence
 
 原因：
 - 当前 backend auth contract 已足够支撑这一步；
+- probe 已经存在，下一步应把它用于真实验收，而不是继续停留在“理论上可验收”；
 - 如果没有真实环境，继续讨论业务页真假混用价值不高。
 
 ### Phase 3 — Frontend：收紧真实登录模式下的 fallback
@@ -165,14 +171,10 @@ QA 下一轮推荐顺序：
 
 #### 1) `docs/sprint1-mock-mvp-watchdog.md`
 当前问题：
-- 仍写成“需要 final mock E2E retest”“Sprint 1 仍未关闭”。
+- 旧版仍写成“需要 final mock E2E retest”“Sprint 1 仍未关闭”。
 
-为什么不准确：
-- `docs/qa-final-mock-retest-2026-03-12.md` 已给出 **demo-ready now for Sprint 1 mock MVP** 的明确结论。
-
-建议修正为：
-- Sprint 1 mock MVP 已完成；
-- 后续关注点转入 Sprint 2 auth + fallback 风险。
+当前状态：
+- 本轮已改为 Sprint 1 closure note，不再追踪活跃 P0。
 
 #### 2) `docs/frontend-wecom-sprint2-impact.md`
 当前问题：
@@ -193,7 +195,8 @@ QA 下一轮推荐顺序：
 - 仍写 `POST /api/auth/wework/callback` 是 placeholder。
 
 为什么不准确：
-- 当前后端已有 `/wework/url`、签名 token、`pendingAccess`、real-mode exchange boundary。
+- 当前后端已有 `/wework/url`、签名 token、`pendingAccess`、real-mode exchange boundary；
+- 且已新增 `probe:wecom-acceptance`，说明当前缺口已转成“真实环境验收与留证”。
 
 建议修正为：
 - backend gap 已从“无合同/纯占位”更新为“真实环境验收待完成 + 用户源仍偏 mock/in-memory”。
@@ -206,19 +209,19 @@ QA 下一轮推荐顺序：
 - 这个目标今天已经完成。
 
 建议修正为：
-- Tech Lead 当前工作重心转为 Sprint 2 auth 验收顺序、fallback 收紧策略、持久化切换节奏。
+- Tech Lead 当前工作重心转为 Sprint 2 auth 验收顺序、acceptance probe 证据化、fallback 收紧策略、持久化切换节奏。
 
 ---
 
 ## 5. Tech Lead 结论
 
-截至 `3086e2e`：
+截至 `02046d0`：
 
 1. **Sprint 1 mock MVP 已完成，可演示。**
 2. **Sprint 2 后端 WeCom auth 第一刀已完成到 stub/integration pass。**
-3. **真正未完成的 P0 是真实 WeCom 环境验收，以及前端 hybrid fallback 对联调结果的遮蔽。**
-4. **下一步不该继续泛化“补更多功能”，而应先按角色顺序完成：环境 -> auth E2E -> 前端收紧 fallback -> 再扩真实持久化读链路。**
+3. **backend 已新增 executable acceptance probe；真正未完成的 P0 是真实 WeCom 环境验收，以及前端 hybrid fallback 对联调结果的遮蔽。**
+4. **下一步不该继续泛化“补更多功能”，而应先按角色顺序完成：环境 -> acceptance probe / auth E2E -> 前端收紧 fallback -> 再扩真实持久化读链路。**
 
 如果 watchdog 只盯一件事，应该盯：
 
-> **团队是否已经从“Sprint 1 是否能演示”切换到“真实 WeCom 登录能否被可靠验收、且不会被前端 fallback 掩盖问题”。**
+> **团队是否已经从“Sprint 1 是否能演示”切换到“真实 WeCom 登录能否被 acceptance probe + QA 可靠验收、且不会被前端 fallback 掩盖问题”。**

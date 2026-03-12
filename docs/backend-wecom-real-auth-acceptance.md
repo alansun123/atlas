@@ -1,6 +1,7 @@
 # Atlas Backend — Real WeCom Auth Acceptance Contract
 
-_Last updated: 2026-03-12_
+_Last updated: 2026-03-12 20:25 GMT+8_  
+_Baseline: `02046d0`_
 
 Scope: backend / ops / QA only. This file turns Sprint 2 real WeCom acceptance from a vague dependency into an executable backend checklist.
 
@@ -175,3 +176,10 @@ Current backend assets supporting this acceptance flow:
 Once secrets + callback environment are available, the next backend-owned step is:
 
 **run and record one truthful real WeCom acceptance pass (success path + pendingAccess path + /auth/me continuity).**
+
+Exact owner sequence:
+1. Ops confirms callback domain + WeCom app config + secrets
+2. Backend runs `npm run check:wecom-env`
+3. Backend runs `npm run probe:wecom-acceptance`
+4. Backend writes back the probe evidence bundle
+5. Only then does Frontend use that evidence to tighten/remove masking fallback on business pages
