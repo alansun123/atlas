@@ -19,10 +19,25 @@ PORT=3000
 
 ## Auth
 
-All protected endpoints support either of:
+Protected endpoints now use signed bearer tokens issued by the backend.
 
-- `Authorization: Bearer <userId>`
-- `x-mock-user-id: <userId>`
+### Supported login paths
+
+- `POST /api/auth/wework/callback` — real-auth-first entry; resolves a WeCom identity via env-gated adapter/stub and returns either:
+  - a signed session token for an active mapped Atlas user, or
+  - `pendingAccess: true` for unmapped / inactive / unusable users
+- `POST /api/auth/mock-login` — explicit dev/demo fallback only
+
+### Dev env knobs
+
+```bash
+ATLAS_AUTH_TOKEN_SECRET=atlas-dev-secret-change-me
+ATLAS_AUTH_TOKEN_TTL_SECONDS=7200
+ATLAS_WECOM_AUTH_MODE=stub
+ATLAS_WECOM_CODE_MAP='{"demo-manager":{"weworkUserId":"manager_zhangsan","name":"张三"}}'
+```
+
+The WeCom callback stub also accepts `stub:<weworkUserId>` style codes in `stub` mode.
 
 Mock users currently available:
 
@@ -51,6 +66,7 @@ Non-zero `code` means business failure.
 
 ### Auth
 - `POST /api/auth/mock-login`
+- `POST /api/auth/wework/callback`
 - `GET /api/auth/me`
 - `POST /api/auth/logout`
 
@@ -82,22 +98,12 @@ curl -X POST http://localhost:3000/api/auth/mock-login \
 ```
 
 ```bash
-curl http://localhost:3000/api/stores \
-  -H 'Authorization: Bearer 101'
+curl -X POST http://localhost:3000/api/auth/wework/callback \
+  -H 'Content-Type: application/json' \
+  -d '{"code":"stub:manager_zhangsan"}'
 ```
 
 ```bash
-curl -X POST http://localhost:3000/api/schedules/batches \
-  -H 'Authorization: Bearer 101' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "storeId": 1,
-    "weekStartDate": "2026-03-23",
-    "weekEndDate": "2026-03-29",
-    "entries": [
-      {"scheduleDate": "2026-03-23", "shiftId": 11, "employeeIds": [101, 102]},
-      {"scheduleDate": "2026-03-23", "shiftId": 12, "employeeIds": [202]}
-    ],
-    "remark": "frontend联调样例"
-  }'
+curl http://localhost:3000/api/stores \
+  -H 'Authorization: Bearer <signed-token>'
 ```

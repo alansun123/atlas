@@ -30,7 +30,7 @@ function createApp() {
   app.get('/', (req, res) => {
     return success(res, {
       service: 'atlas-server',
-      version: 'mock-mvp',
+      version: 'mock-mvp-auth-signed',
       currentUser: req.user || null,
       routes: [
         '/health',
