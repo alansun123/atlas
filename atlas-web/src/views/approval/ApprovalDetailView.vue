@@ -84,7 +84,9 @@ onMounted(load)
         :tone="detail.noticeTone"
         :title="detail.source === 'api' ? '审批详情当前处于真实接口模式' : '审批详情当前处于 fallback 模式'"
         :points="detail.noticePoints"
-      />
+      >
+        <small v-if="detail.source !== 'api'">当前详情与班表摘要为本地 fallback/mock，审批按钮会保持禁用。</small>
+      </IntegrationNotice>
 
       <section class="card section-gap">
         <h3>触发规则</h3>

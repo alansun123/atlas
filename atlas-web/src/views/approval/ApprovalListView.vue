@@ -57,7 +57,9 @@ watch(() => route.query.tab, load)
       :tone="noticeTone"
       :title="source === 'api' ? '审批列表当前处于真实接口模式' : '审批列表当前处于 fallback 模式'"
       :points="noticePoints"
-    />
+    >
+      <small v-if="source !== 'api'">当前卡片数据为本地 fallback/mock，请勿据此判断真实接口已联通。</small>
+    </IntegrationNotice>
 
     <StateBlock v-if="loading" tone="loading" title="审批列表加载中" />
     <StateBlock v-else-if="error" tone="error" title="审批列表加载失败" :description="error">

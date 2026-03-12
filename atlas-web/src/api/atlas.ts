@@ -186,12 +186,17 @@ export async function fetchEmployeeScheduleWithFallback() {
         note: today.note || '来自后端 /api/schedules/me',
       },
       shifts,
+      noticeTone: 'good' as const,
+      noticePoints: ['当前员工班表来自后端接口。', '如果真实会话失效，页面会显示明确错误或显式 fallback 提示，不会继续冒充成功。'],
     }
   } catch (error) {
-    if (!ENABLE_API_DATA_FALLBACK) throw error
+    await handleFallbackableError(error)
+    if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '员工班表加载'))
     return {
       source: 'mock' as const,
       ...(await fetchMockEmployeeSchedule()),
+      noticeTone: isAuthError(error) ? 'danger' as const : 'warn' as const,
+      noticePoints: [fallbackReason(error, '员工班表'), '当前页面展示的是前端 fallback 班表，仅用于演示，不能作为真实联调成功证据。'],
     }
   }
 }
@@ -390,6 +395,8 @@ export async function fetchManagerScheduleWithFallback() {
       weekRange: weekRangeLabel(batch.weekStartDate, batch.weekEndDate),
       batchId: batch.id,
       batchStatus: batch.status,
+      noticeTone: 'good' as const,
+      noticePoints: ['当前店长排班来自后端接口。', '校验 / 提审 / 发布按钮均会调用真实 API；若会话失效，页面会给出明确错误或显式 fallback 提示。'],
       summary: [
         { label: '总班次', value: String((batch.entries || []).length) },
         { label: '已排员工', value: String(new Set((batch.entries || []).map((entry: any) => entry.employeeId)).size) },
@@ -411,10 +418,13 @@ export async function fetchManagerScheduleWithFallback() {
       },
     }
   } catch (error) {
-    if (!ENABLE_API_DATA_FALLBACK) throw error
+    await handleFallbackableError(error)
+    if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '店长排班加载'))
     return {
       source: 'mock' as const,
       ...(await import('./mock').then((m) => m.fetchManagerSchedule())),
+      noticeTone: isAuthError(error) ? 'danger' as const : 'warn' as const,
+      noticePoints: [fallbackReason(error, '店长排班'), '当前页面展示的是前端 fallback 排班；校验 / 提审 / 发布不能作为真实联调成功证据。'],
       meta: {
         hasBackendBatch: false,
       },

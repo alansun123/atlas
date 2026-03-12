@@ -4,6 +4,7 @@ import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import StatusTag from '../../components/common/StatusTag.vue'
 import WeekSwitcher from '../../components/schedule/WeekSwitcher.vue'
+import IntegrationNotice from '../../components/common/IntegrationNotice.vue'
 import { fetchEmployeeScheduleWithFallback } from '../../api/atlas'
 import { formatStatusText } from '../../utils/helpers'
 
@@ -36,10 +37,17 @@ onMounted(load)
     </StateBlock>
 
     <template v-else-if="data">
+      <IntegrationNotice
+        class="section-gap"
+        :tone="data.noticeTone"
+        :title="data.source === 'api' ? '员工班表当前处于真实接口模式' : '员工班表当前处于 fallback 模式'"
+        :points="data.noticePoints"
+      />
+
       <section class="card section-gap">
         <div class="section-title-row">
           <h3>{{ data.today.title }}</h3>
-          <StatusTag :type="data.today.status === 'conflict' ? 'warn' : 'good'">{{ formatStatusText(data.today.status) }}</StatusTag>
+          <StatusTag :type="data.source === 'mock' ? 'danger' : data.today.status === 'conflict' ? 'warn' : 'good'">{{ data.source === 'mock' ? 'FALLBACK / MOCK' : formatStatusText(data.today.status) }}</StatusTag>
         </div>
         <p>{{ data.today.timeRange }}</p>
         <small>{{ data.today.note }}</small>

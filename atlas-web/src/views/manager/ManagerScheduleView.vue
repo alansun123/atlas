@@ -5,6 +5,7 @@ import StateBlock from '../../components/common/StateBlock.vue'
 import WeekSwitcher from '../../components/schedule/WeekSwitcher.vue'
 import ValidationPanel from '../../components/schedule/ValidationPanel.vue'
 import StatusTag from '../../components/common/StatusTag.vue'
+import IntegrationNotice from '../../components/common/IntegrationNotice.vue'
 import { fetchManagerScheduleWithFallback, publishManagerBatch, revalidateManagerBatch, submitManagerApproval } from '../../api/atlas'
 
 const loading = ref(true)
@@ -81,10 +82,17 @@ onMounted(load)
     <StateBlock v-else-if="error" tone="error" title="排班加载失败" :description="error" />
 
     <template v-else-if="data">
+      <IntegrationNotice
+        class="section-gap"
+        :tone="data.noticeTone"
+        :title="data.source === 'api' ? '店长排班当前处于真实接口模式' : '店长排班当前处于 fallback 模式'"
+        :points="data.noticePoints"
+      />
+
       <section class="card section-gap">
         <div class="section-title-row">
           <h3>{{ data.storeName }}</h3>
-          <StatusTag :type="data.batchStatus === 'published' ? 'good' : 'warn'">{{ data.batchStatus }}</StatusTag>
+          <StatusTag :type="data.source === 'mock' ? 'danger' : data.batchStatus === 'published' ? 'good' : 'warn'">{{ data.source === 'mock' ? 'FALLBACK / MOCK' : data.batchStatus }}</StatusTag>
         </div>
         <small class="muted">当前走真实后端链路：<code>/api/stores</code>、<code>/api/stores/:id/shifts</code>、<code>/api/employees</code>、<code>/api/schedules/batches</code>、<code>/validate</code>。若需临时启用前端本地 fallback，必须显式设置 <code>VITE_ENABLE_API_DATA_FALLBACK=true</code>。</small>
         <div class="grid-cards compact-grid">
