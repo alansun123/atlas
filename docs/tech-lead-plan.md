@@ -38,3 +38,4 @@
    - 前置项：CorpID / AgentID / Secret、回调域名、用户映射规则、pending-access 承接。
    - 首波范围：WeCom OAuth、本地用户映射/登录态、权限初始化、基础持久化。
    - 暂不把请假同步全量闭环、审批回写 WeCom、消息通知作为 Sprint 2 首波阻塞。
+   - 执行细案见：`docs/sprint2-wecom-kickoff.md`。
