@@ -2,6 +2,29 @@
 
 Express-based mock backend for Atlas frontend integration.
 
+## Persistence
+
+**Status: Enabled (Phase 1)**
+
+The backend now uses SQLite (better-sqlite3) for persistent storage. Data is stored in:
+
+```
+data/atlas.db
+```
+
+Tables:
+- `users` - User accounts with roles and permissions
+- `stores` - Store information
+- `store_staffs` - Store-staff relationships
+
+On first run, the database is automatically seeded with mock data from `src/data/mock-db.js`.
+
+To reset the database:
+```bash
+rm data/atlas.db
+npm start
+```
+
 ## Start
 
 ```bash
