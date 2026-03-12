@@ -6,7 +6,7 @@ _Last updated: 2026-03-12_
 
 This note is intentionally **backend-only** and grounded in the current `atlas-server` codebase.
 
-Goal: define the **minimum backend change set** for Sprint 2 first-wave WeCom login so frontend can stop relying on local mock session bootstrapping.
+Goal: define the **remaining backend acceptance scope** for Sprint 2 real WeCom login so the team can finish environment-backed auth acceptance without reopening already-landed Sprint 1 / approval hardening work.
 
 Out of scope for this slice:
 - full employee directory sync
@@ -32,9 +32,9 @@ Observed behavior:
   - `x-mock-user-id: <userId>`
 - token is not signed, not encrypted, and not stateful; it is just a numeric local user id.
 - `POST /api/auth/mock-login` returns `accessToken = String(user.id)`.
-- `POST /api/auth/wework/callback` is only a placeholder and always logs in the first mock user when `code` exists.
-- `GET /api/auth/me` depends entirely on the mock bearer/user-id header parsing.
-- `POST /api/auth/logout` is effectively a no-op acknowledgement.
+- `POST /api/auth/wework/callback` is no longer planning-wise "placeholder-only"; current repo reality already includes a real-auth-first callback direction plus executable acceptance probing, but real-environment acceptance is still pending.
+- `GET /api/auth/me` still remains part of the auth acceptance chain and must be verified in a real environment after callback and refresh.
+- `POST /api/auth/logout` still needs to behave deterministically as part of acceptance evidence.
 
 ### 1.2 User model today
 
@@ -63,28 +63,27 @@ This is good news: Sprint 2 does **not** need a role-system rewrite. It mainly n
 
 ---
 
-## 2. Main gaps blocking first-wave WeCom login
+## 2. Main remaining gaps blocking real-environment WeCom acceptance
 
-### Gap A: no real WeCom code -> user identity exchange
+### Gap A: real WeCom code -> user identity exchange still lacks environment-backed acceptance
 
-Missing today:
-- service to call WeCom `code` exchange endpoint
-- validation of returned WeCom user id
-- error mapping when WeCom returns failure / expired code
-
-Impact:
-- `/api/auth/wework/callback` cannot establish real identity
-
-### Gap B: no real backend login state
-
-Missing today:
-- signed JWT or server session
-- auth middleware that verifies signed login state
-- token issuance/expiry rules beyond mock response fields
+Still to prove in a real environment:
+- the chosen WeCom `code` exchange path works against the actual tenant/app config
+- returned WeCom user identity matches expected mapping inputs
+- expired / invalid code branches are evidenced, not just assumed from stub behavior
 
 Impact:
-- frontend cannot safely rely on backend auth in non-demo mode
-- any caller can impersonate any user by sending `Bearer 101`
+- until acceptance runs against a real environment, `/api/auth/wework/callback` is not fully accepted even if the integration skeleton exists
+
+### Gap B: real backend login state still needs real-run proof
+
+Acceptance still needs evidence for:
+- signed JWT or server-session behavior in the target environment
+- auth middleware verification on real callback-issued login state
+- token issuance / expiry behavior under refresh and invalid-session cases
+
+Impact:
+- frontend acceptance should not assume backend auth is fully proven until those real-run checks are captured
 
 ### Gap C: no explicit pending-access state
 
@@ -358,13 +357,13 @@ This keeps frontend routing simple while avoiding fake authenticated sessions.
 
 ## 11. Recommended sequence
 
-1. add config parsing + signed token utility
-2. implement WeCom code exchange service wrapper
-3. replace fallback behavior in `POST /api/auth/wework/callback`
-4. upgrade auth middleware to verify signed token and attach local user
-5. preserve `GET /api/auth/me` contract
-6. keep `mock-login` only behind dev usage guidance
-7. optionally add minimal auth logging
+1. finalize real env / callback domain / tenant alignment
+2. reserve mapped + pending-access real test identities
+3. run the existing env / acceptance probe flow and capture evidence
+4. verify `POST /api/auth/wework/callback` success + `pendingAccess` behavior in that real run
+5. verify `GET /api/auth/me` refresh continuity and invalid-session handling
+6. keep `mock-login` only as dev/demo guidance, not Sprint 2 acceptance evidence
+7. only then treat any additional backend persistence/logging work as follow-up
 
 This sequence gives the team a real login backbone without touching schedule/approval domain logic.
 
@@ -372,15 +371,17 @@ This sequence gives the team a real login backbone without touching schedule/app
 
 ## 12. Bottom line
 
-The current backend is structurally close to supporting first-wave WeCom auth because:
+The current backend is structurally close to accepted first-wave WeCom auth because:
 - local user records already have `weworkUserId`
 - RBAC already depends on `req.user`
+- the repo now has more than a placeholder-only callback posture
 - frontend already anticipates callback + pending-access flow
 
-The true missing pieces are concentrated and small:
-- real code exchange
-- signed login state
-- explicit pending-access branching
-- minimal config/persistence hygiene
+The remaining Sprint 2 backend P0 is therefore narrower than earlier wording implied:
+- real-environment code exchange acceptance
+- signed login-state proof across callback + `/auth/me`
+- explicit `pendingAccess` evidence
+- deterministic invalid-session / logout behavior
+- minimal env/config hygiene needed to execute acceptance
 
-That should be the Sprint 2 backend first slice.
+That should be treated as the Sprint 2 backend acceptance slice, not as a restart of backend auth from zero.
