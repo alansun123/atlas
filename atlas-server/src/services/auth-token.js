@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
-const DEFAULT_TTL_SECONDS = Number.parseInt(process.env.ATLAS_AUTH_TOKEN_TTL_SECONDS || '7200', 10);
-const SECRET = process.env.ATLAS_AUTH_TOKEN_SECRET || 'atlas-dev-secret-change-me';
+const DEFAULT_TTL_SECONDS = Number.parseInt(process.env.ATLAS_AUTH_TOKEN_TTL_SECONDS || process.env.JWT_TOKEN_TTL_SECONDS || '7200', 10);
+const SECRET = process.env.JWT_SECRET || process.env.ATLAS_AUTH_TOKEN_SECRET || 'atlas-dev-secret-change-me';
 
 function base64UrlEncode(input) {
   return Buffer.from(input)
