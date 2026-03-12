@@ -176,6 +176,7 @@ export async function fetchEmployeeScheduleWithFallback() {
       note: '后端当前未返回今日已排班。',
     }
 
+    console.log('[Atlas] 员工班表: 真实 API 数据')
     return {
       source: 'api' as const,
       weekRange: weekRangeLabel(formatDate(start), formatDate(end)),
@@ -191,6 +192,7 @@ export async function fetchEmployeeScheduleWithFallback() {
     }
   } catch (error) {
     await handleFallbackableError(error)
+    console.warn('[Atlas] ⚠️ 员工班表 API 失败，已回退到 mock 数据。错误:', error)
     if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '员工班表加载'))
     return {
       source: 'mock' as const,
@@ -260,9 +262,11 @@ export async function fetchApprovalsWithFallback() {
       submittedAt: item.createdAt ? new Date(item.createdAt).toLocaleString('zh-CN') : '-',
       roleView: String(item.submittedBy) === me.id ? 'submitted' : (pendingIds.has(Number(item.id)) ? 'pending' : 'submitted'),
     }))
+    console.log('[Atlas] 审批列表: 真实 API 数据')
     return { source: 'api' as const, items, noticeTone: 'good' as const, noticePoints: ['当前审批列表来自后端接口。', '如果真实会话失效，页面会显示明确错误而不是继续冒充成功。'] }
   } catch (error) {
     await handleFallbackableError(error)
+    console.warn('[Atlas] ⚠️ 审批列表 API 失败，已回退到 mock 数据。错误:', error)
     if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '审批列表加载'))
     return {
       source: 'mock' as const,
@@ -277,6 +281,7 @@ export async function fetchApprovalDetailWithFallback(id: string) {
   try {
     const detail = await apiRequest<any>(`/approvals/${id}`)
     const batchDetail = detail.scheduleBatch?.id ? await apiRequest<any>(`/schedules/batches/${detail.scheduleBatch.id}`) : null
+    console.log('[Atlas] 审批详情: 真实 API 数据')
     return {
       source: 'api' as const,
       id: String(detail.id),
@@ -293,6 +298,7 @@ export async function fetchApprovalDetailWithFallback(id: string) {
     }
   } catch (error) {
     await handleFallbackableError(error)
+    console.warn('[Atlas] ⚠️ 审批详情 API 失败，已回退到 mock 数据。错误:', error)
     if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '审批详情加载'))
     return {
       source: 'mock' as const,
@@ -397,6 +403,7 @@ export async function fetchManagerScheduleWithFallback() {
       grouped.set(key, list)
     })
 
+    console.log('[Atlas] 店长排班: 真实 API 数据')
     return {
       source: 'api' as const,
       storeId: String(store.id),
@@ -428,6 +435,7 @@ export async function fetchManagerScheduleWithFallback() {
     }
   } catch (error) {
     await handleFallbackableError(error)
+    console.warn('[Atlas] ⚠️ 店长排班 API 失败，已回退到 mock 数据。错误:', error)
     if (!ENABLE_API_DATA_FALLBACK) throw new Error(getErrorMessage(error, '店长排班加载'))
     return {
       source: 'mock' as const,
