@@ -1,42 +1,40 @@
 # Atlas Tech Lead Plan
 
-> 目标：在 Sprint 1 内把 Atlas 拉到“可演示 MVP”状态，并优先减少文档与代码漂移。
+> 目标：在 Sprint 1 内把 Atlas 拉到“mock MVP 可演示完成”状态，并优先减少文档与代码漂移。
 > 更新时间：2026-03-12
 
 ## 执行计划
 
 1. **冻结 Sprint 1 演示边界为 mock MVP**
-   - 以“mock 登录 + mock 排班/审批闭环”为 Sprint 1 演示口径。
-   - 真实企微 OAuth、MySQL 落库、请假回调保留接口与文档，但不作为本 Sprint 演示阻塞项。
+   - 以“mock 登录 + mock 排班/审批/发布闭环”为 Sprint 1 演示口径。
+   - 真实 WeCom OAuth、持久化、请假回调保留接口与文档，但不作为本 Sprint 演示阻塞项。
 
-2. **把 README / Sprint / QA 文档统一到当前仓库事实**
+2. **把 README / Sprint / Watchdog 文档统一到当前仓库事实**
    - 统一仓库地址为 `github.com/alansun123/atlas`。
-   - 明确 `atlas-web/` 已创建但尚未达到可运行脚手架状态。
-   - 避免再出现“前端缺失”和“前端已可运行”两种相反描述并存。
+   - 明确 Sprint 1 验收是 mock MVP demo closure，而不是 WeCom 登录交付。
+   - 避免再出现“RBAC 未收口 / 审批详情未完成 / Sprint 1 必须上 WeCom”三类过期表述。
 
-3. **以前端可运行骨架为 Sprint 1 头号阻塞项**
-   - 补齐 `atlas-web/package.json`、Vite 配置、`index.html`、`src/main.*`、基础路由。
-   - 最低标准：`npm install`、`npm run dev`、`/login`、`/home` 可访问。
+3. **确认已落地 hardening 已从“待做”切为“待最终回归”**
+   - 后端 RBAC + approval flow hardening 已落地：`54ec2b8`。
+   - 前端 approval detail / mock flow hardening 已落地：`b577c31`。
+   - 这些项现在是 QA retest 关注点，不再是 Tech Lead 待分派开发项。
 
 4. **锁定前后端联调合同为现有 mock API**
    - 前端第一轮只对接已存在的后端 mock 路由：`/api/auth`、`/api/stores`、`/api/employees`、`/api/schedules`、`/api/leaves`、`/api/approvals`。
    - 不新增第二套命名，缺口通过补文档或补最小兼容接口解决。
 
-5. **优先打通 4 条演示链路而非平均铺开**
+5. **Sprint 1 仅保留最终 mock E2E retest 作为收口 gate**
    - 员工：mock 登录 → `/home` → `/employee/schedule`。
-   - 店长：mock 登录 → `/manager/schedule` → 创建草稿 → 校验。
-   - 审批：提交审批 → `/approvals` → `/approvals/:id` → 通过/驳回。
-   - 发布：审批通过后发布排班，员工侧能看到已发布班表。
+   - 店长：mock 登录 → `/manager/schedule` → 生成/查看批次 → 校验 → 提交审批。
+   - 运营经理：`/approvals` → `/approvals/:id` → 通过/驳回。
+   - 店长/员工：审批通过后发布排班，员工侧能看到已发布班表。
+   - Retest 同时确认 approval detail 刷新、RBAC 拒绝、状态机拦截都符合当前 hardening 基线。
 
-6. **后端在 Sprint 1 只补“演示刚需缺口”**
-   - 保持统一响应结构与复数路由前缀。
-   - 若前端联调发现缺字段，优先补 mock data / DTO，不急于引入真实数据库与 ORM。
-   - 把 `wework`、`db`、`sync` 标记为 Sprint 2 真集成任务。
-
-7. **建立一份单一事实源的验收清单**
+6. **建立一份单一事实源的验收清单**
    - 以 `docs/mvp-delivery-checklist.md` 作为演示验收主表。
    - 每补齐一个页面、接口或脚手架，就同步更新清单，避免 README、QA、Sprint 各写各的。
 
-8. **Sprint 1 收口方式：先演示，再切真实集成**
-   - 演示前完成一次前后端冒烟：启动、登录、排班、审批、发布。
-   - 演示后立即进入 Sprint 2：企微 OAuth 真接入、MySQL schema、请假同步与持久化。
+7. **Sprint 2 以 WeCom 集成为明确 kickoff 主题**
+   - 前置项：CorpID / AgentID / Secret、回调域名、用户映射规则、pending-access 承接。
+   - 首波范围：WeCom OAuth、本地用户映射/登录态、权限初始化、基础持久化。
+   - 暂不把请假同步全量闭环、审批回写 WeCom、消息通知作为 Sprint 2 首波阻塞。
