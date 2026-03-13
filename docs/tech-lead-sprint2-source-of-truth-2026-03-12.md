@@ -266,6 +266,7 @@ Required plan:
 - suppress new Frontend + QA worker spawns for already-landed fallback/auth-checklist work unless a fresh regression appears
 - keep Backend persistence work explicitly secondary to auth acceptance truth
 - 2026-03-13 21:53 GMT+8 supervisor tick: repo check was still clean before doc edits, no Atlas workers were active, latest head before this refresh included `8d18788` and `fab1c91`, and the remaining open work is still externally blocked real WeCom acceptance rather than any newly unlocked repo-only Frontend / Backend / QA task
+- 2026-03-13 21:58 GMT+8 supervisor tick: `subagents list` still showed no active Atlas workers and only the already-finished Backend acceptance-packet plus Tech Lead alignment runs in recent history, branch head still reflected watchdog/doc maintenance only (`ac6329c`, `8d18788`, `fab1c91`), and no fresh regression or real-env unblock signal appeared; keep Frontend / Backend / QA suppressed until real WeCom acceptance becomes executable or a new failing regression appears
 
 ### Do not do now
 - do not reopen Sprint 1 closure work
