@@ -1,6 +1,6 @@
 # Atlas Watchdog Status
 
-**Last Check:** 2026-03-13 17:48 GMT+8
+**Last Check:** 2026-03-13 18:08 GMT+8
 
 ## Status: Sprint 1 COMPLETED ✅ — Waiting on WeCom Credentials
 
@@ -24,6 +24,10 @@
   - `61b0315 fix(web): make auth fallback states truthful`
   - `382d4a8 feat(atlas-server): add auth request tracing logs`
 - Current repo posture: later repo-head movement may be watchdog/planning doc maintenance only and is not, by itself, a stale-status trigger
+- New repo-head evidence landed this cycle:
+  - `11eca30` — backend persistence user-id restart-safety hardening + backend smoke evidence
+  - `421787f` — tech-lead real WeCom acceptance handoff/runbook alignment
+  - `c9fd93e` — QA head regression evidence pack on current branch head
 - Working tree delta at check time: clean
 - Real WeCom auth remains blocked in live acceptance until real env is provided; redirect override now defaults OFF and should be enabled only for explicit local smoke tests
 - Required real-acceptance env remains unavailable in the shared acceptance environment: `ATLAS_AUTH_TOKEN_SECRET`, `WECOM_CORP_ID`, `WECOM_AGENT_ID`, `WECOM_SECRET`, `WECOM_REDIRECT_URI`
@@ -45,7 +49,9 @@
 - QA evidence for `fc87dd5` is now captured in `docs/qa-fc87dd5-approval-fallback-session-check-2026-03-13.md`: it records a historical intermediate state where read-path truthfulness improved, but the approval action mutation-path session guard was still incomplete and was later addressed by `61b0315`
 - Working tree delta at check time was clean before watchdog maintenance
 - No fresh failing regression or new env credentials were found this tick
-- Because Atlas still has executable backend-only work beyond the closed approval/RBAC/state-machine scope, watchdog spawned backend worker `atlas-backend-persistence-nextstep` (`d4a6d2f2-7cd2-401d-9933-8ba32bfd7052`) to advance the highest-value auth-contract-safe persistence/evidence step without reopening closed frontend/QA scope
+- Previously spawned backend persistence/evidence step has now completed successfully via `11eca30`, and the follow-up QA + tech-lead documentation steps also completed successfully via `c9fd93e` and `421787f`
+- No Atlas subagents remain active after those completions
+- Watchdog did **not** spawn a new worker this tick because the remaining open item is still real WeCom environment-backed acceptance, which is blocked on external credentials / callback environment rather than an executable repo-only role task
 
 ### Next Trigger
 Spawn workers only if one of the following changes:
