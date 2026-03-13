@@ -1,6 +1,6 @@
 # Atlas Watchdog Status
 
-**Last Check:** 2026-03-13 17:43 GMT+8
+**Last Check:** 2026-03-13 17:48 GMT+8
 
 ## Status: Sprint 1 COMPLETED ✅ — Waiting on WeCom Credentials
 
@@ -40,11 +40,12 @@
 - `docs/qa-auth-truth-retest-2026-03-13.md` records PASS for the auth-truthfulness retest on `61b0315`, covering callback stale-session clearing, pending-access non-login wording, and `/home` mock/fallback warning clarity
 - `docs/WECOM_INTEGRATION_PLAN.md` exists and remains the integration plan reference
 - Backend and docs reflect the current auth-first baseline; latest backend implementation delta is `382d4a8 feat(atlas-server): add auth request tracing logs`, which improves real-env acceptance evidence capture without reopening Sprint 1 scope
-- Active Atlas subagents this tick: none
+- Active Atlas subagents at tick start: none
 - Latest relevant implementation commits remain `61b0315` (frontend auth truthfulness) and `382d4a8` (backend tracing); `fc87dd5` is retained only as historical QA nuance beneath the current baseline, not as newer active implementation scope
 - QA evidence for `fc87dd5` is now captured in `docs/qa-fc87dd5-approval-fallback-session-check-2026-03-13.md`: it records a historical intermediate state where read-path truthfulness improved, but the approval action mutation-path session guard was still incomplete and was later addressed by `61b0315`
-- Working tree delta at check time was clean
-- No fresh failing regression or new env credentials were found this tick, so no role worker was respawned
+- Working tree delta at check time was clean before watchdog maintenance
+- No fresh failing regression or new env credentials were found this tick
+- Because Atlas still has executable backend-only work beyond the closed approval/RBAC/state-machine scope, watchdog spawned backend worker `atlas-backend-persistence-nextstep` (`d4a6d2f2-7cd2-401d-9933-8ba32bfd7052`) to advance the highest-value auth-contract-safe persistence/evidence step without reopening closed frontend/QA scope
 
 ### Next Trigger
 Spawn workers only if one of the following changes:
