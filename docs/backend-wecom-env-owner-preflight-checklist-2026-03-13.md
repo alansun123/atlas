@@ -99,6 +99,79 @@ Backend 交 QA / Tech Lead 时，最少应给出：
 - [ ] tracing/log 引用
 - [ ] backend commit hash
 
+### 5.1 现场留档模板（建议直接复制到执行记录里）
+
+> 目的：避免执行完才发现少了时间戳、命令行或日志定位信息。下面这些字段都来自当前脚本/流程，不引入新要求。
+
+```md
+# WeCom real acceptance evidence
+
+- Run owner:
+- Run date/time (GMT+8):
+- Backend env URL:
+- Backend commit hash:
+- Redirect override confirmed off (`ATLAS_WECOM_ALLOW_REDIRECT_OVERRIDE=false`): yes / no
+
+## Identity labels used
+- success label:
+- success expected Atlas role:
+- pendingAccess label:
+- pendingAccess expected accessState:
+
+## Step A — check:wecom-env
+- Command:
+  `cd atlas-server && npm run check:wecom-env`
+- Result:
+- Evidence snippet:
+  - `effectiveMode=`
+  - `READY_FOR_REAL_AUTH_ENV_CHECK=`
+
+## Step B — probe:wecom-acceptance
+- Command:
+  `cd atlas-server && ATLAS_BACKEND_BASE_URL=... ATLAS_WECOM_SUCCESS_CODE='...' ATLAS_WECOM_PENDING_CODE='...' npm run probe:wecom-acceptance`
+- Probe log file/path:
+- Result:
+
+### Login URL evidence
+- HTTP status:
+- `mode=`
+- `corpId=`
+- `agentId=`
+- `redirectUri=`
+- `state=`
+
+### Success callback evidence
+- Timestamp:
+- Identity label:
+- `loginType=`
+- `wecomMode=`
+- token issued: yes / no
+- mapped Atlas role:
+
+### Session continuity evidence
+- First `/api/auth/me` summary:
+- Second `/api/auth/me` summary:
+- identity stable: yes / no
+- role stable: yes / no
+
+### Pending-access evidence
+- Timestamp:
+- Identity label:
+- `pendingAccess=`
+- `accessState=`
+- token issued: yes / no
+
+### Invalid-session evidence
+- missing token status:
+- malformed token status:
+- logout contract checked: yes / no
+
+## Trace/log references
+- callback success trace/log reference:
+- callback pending trace/log reference:
+- auth-event snippet reference:
+```
+
 ## 6. 当前阻塞结论（截至 2026-03-13 19:27 GMT+8）
 
 当前默认仓库环境执行结果仍是：
