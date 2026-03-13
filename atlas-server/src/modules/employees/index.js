@@ -44,7 +44,6 @@ router.post('/', (req, res) => {
   if (!name || !storeId) return fail(res, 1001, 'name 和 storeId 为必填字段');
 
   const user = createUser({
-    weworkUserId: `mock_${db.counters.employeeId += 1}`,
     name,
     mobile,
     role,

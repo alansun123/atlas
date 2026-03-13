@@ -2,7 +2,10 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const mockDb = require('./mock-db');
 
-const DB_PATH = path.join(__dirname, '../../data/atlas.db');
+function resolveDbPath() {
+  return process.env.ATLAS_DB_PATH || path.join(__dirname, '../../data/atlas.db');
+}
+
 let db = null;
 
 /**
@@ -10,10 +13,17 @@ let db = null;
  */
 function getDb() {
   if (!db) {
-    db = new Database(DB_PATH);
+    db = new Database(resolveDbPath());
     db.pragma('journal_mode = WAL');
   }
   return db;
+}
+
+function closeDb() {
+  if (db) {
+    db.close();
+    db = null;
+  }
 }
 
 /**
@@ -205,12 +215,28 @@ function findUsersByStoreId(storeId) {
   return rows.map(parseUserRow);
 }
 
+function getNextMockWeworkUserId() {
+  const rows = getDb().prepare(`
+    SELECT id, weworkUserId FROM users
+  `).all();
+
+  const maxId = rows.reduce((currentMax, row) => {
+    const match = /^mock_(\d+)$/.exec(row.weworkUserId || '');
+    if (match) {
+      return Math.max(currentMax, Number(match[1]));
+    }
+    return Math.max(currentMax, Number(row.id) || 0);
+  }, Number(mockDb.counters.employeeId) || 0);
+
+  return `mock_${maxId + 1}`;
+}
+
 function createUser(user) {
   const result = getDb().prepare(`
     INSERT INTO users (weworkUserId, name, mobile, role, status, joinedAt, permissions, primaryStoreId)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    user.weworkUserId,
+    user.weworkUserId || getNextMockWeworkUserId(),
     user.name,
     user.mobile,
     user.role || 'employee',
@@ -368,8 +394,10 @@ function parseStoreStaffRow(row) {
 // Export all functions
 module.exports = {
   getDb,
+  closeDb,
   initDatabase,
   seedInitialData,
+  getNextMockWeworkUserId,
   // Users
   findUserById,
   findUserByWeworkUserId,
