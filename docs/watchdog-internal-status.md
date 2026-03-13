@@ -19,7 +19,9 @@
 ### Current State
 - No active Atlas subagents
 - Repo branch: `techlead/watchdog-followup-20260312`
-- Latest relevant implementation commit: `382d4a8 feat(atlas-server): add auth request tracing logs`
+- Latest relevant implementation commits:
+  - `61b0315 fix(web): make auth fallback states truthful`
+  - `382d4a8 feat(atlas-server): add auth request tracing logs`
 - Current repo posture: later repo-head movement may be watchdog/planning doc maintenance only and is not, by itself, a stale-status trigger
 - Working tree delta at check time: clean
 - Real WeCom auth remains blocked in live acceptance until real env is provided; redirect override now defaults OFF and should be enabled only for explicit local smoke tests
@@ -34,10 +36,11 @@
 
 ### Verified Evidence This Tick
 - `docs/qa-auth-first-retest-checklist.md` still marks real-mode acceptance as blocked on credentials
+- `docs/qa-auth-truth-retest-2026-03-13.md` records PASS for the auth-truthfulness retest on `61b0315`, covering callback stale-session clearing, pending-access non-login wording, and `/home` mock/fallback warning clarity
 - `docs/WECOM_INTEGRATION_PLAN.md` exists and remains the integration plan reference
 - Backend and docs reflect the current auth-first baseline; latest backend implementation delta is `382d4a8 feat(atlas-server): add auth request tracing logs`, which improves real-env acceptance evidence capture without reopening Sprint 1 scope
 - Active Atlas subagents this tick: none
-- Latest relevant implementation commit remains `382d4a8 feat(atlas-server): add auth request tracing logs`
+- Latest relevant implementation commits remain `61b0315` (frontend auth truthfulness) and `382d4a8` (backend tracing)
 - Working tree delta at check time was clean
 
 ### Next Trigger

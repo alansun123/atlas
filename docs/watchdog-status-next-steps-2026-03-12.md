@@ -11,8 +11,10 @@
 - Sprint 1 mock MVP retest: PASS / demo-ready
 - approval-detail hardening + RBAC/state-machine hardening: PASS for intended Sprint 1 scope
 - Sprint 2 backend auth contract + probe support: landed on current baseline
-- frontend real-auth-first skeleton: landed
-- latest relevant implementation commit: `382d4a8 feat(atlas-server): add auth request tracing logs`
+- frontend real-auth-first skeleton + auth-truthfulness retest: PASS
+- latest relevant implementation commits:
+  - `61b0315 fix(web): make auth fallback states truthful`
+  - `382d4a8 feat(atlas-server): add auth request tracing logs`
 
 ### Still open
 #### Blocked by user/env

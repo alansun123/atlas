@@ -17,8 +17,8 @@ These items are already closed on the current repo baseline and must not be rest
   Reference: `docs/qa-approval-hardening-retest-2026-03-12.md`
 - **Sprint 2 backend auth contract first wave** = stub/integration PASS with executable probe support  
   References: `docs/qa-wecom-auth-watchdog-2026-03-12.md`, `docs/qa-wecom-acceptance-probe-retest-2026-03-12.md`
-- **Frontend real-auth-first skeleton** = materially landed  
-  Current repo reality: `LoginView.vue` is WeCom-first, `AuthCallbackView.vue` exchanges real code, and session failure handling is more explicit than before.
+- **Frontend real-auth-first skeleton** = materially landed and truthfulness retest PASS  
+  Current repo reality: `LoginView.vue` is WeCom-first; `AuthCallbackView.vue` now clears stale session on callback failure; `PendingAccessView.vue` explicitly marks no-token state as non-login; `HomeView.vue` marks mock/fallback content as non-acceptance evidence. Reference: `docs/qa-auth-truth-retest-2026-03-13.md`
 
 Planning implication:
 - do **not** reopen Sprint 1 closure work
