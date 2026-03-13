@@ -1,6 +1,6 @@
 # Atlas Watchdog Status
 
-**Last Check:** 2026-03-13 06:18 UTC
+**Last Check:** 2026-03-13 06:33 UTC
 
 ## Status: Sprint 1 COMPLETED ✅ — Waiting on WeCom Credentials
 
@@ -14,7 +14,7 @@
 ### Current State
 - No active Atlas subagents
 - Repo branch: `techlead/watchdog-followup-20260312`
-- Latest relevant commit: `0124605 backend(auth): default wecom redirect override off`
+- Latest relevant commit: `1a1f249 docs(tech-lead): align watchdog wording after redirect hardening`
 - Working tree delta: only this watchdog status note is pending
 - Real WeCom auth remains blocked in live acceptance until real env is provided; redirect override now defaults OFF and should be enabled only for explicit local smoke tests
 - Required real-acceptance env remains unavailable in the shared acceptance environment: `ATLAS_AUTH_TOKEN_SECRET`, `WECOM_CORP_ID`, `WECOM_AGENT_ID`, `WECOM_SECRET`, `WECOM_REDIRECT_URI`
@@ -31,7 +31,7 @@
 - `docs/WECOM_INTEGRATION_PLAN.md` exists and remains the integration plan reference
 - Backend and docs still reflect stub-capable current state; no new implementation delta appeared that requires reassignment
 - Active Atlas subagents this tick: none
-- Repo head remains `64ba068 docs(tech-lead): suppress stale atlas worker triggers`
+- Repo head remains `1a1f249 docs(tech-lead): align watchdog wording after redirect hardening`
 - Working tree delta remains limited to this internal watchdog status note
 
 ### Next Trigger
