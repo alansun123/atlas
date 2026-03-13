@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppShell from '../../components/common/AppShell.vue'
 import StateBlock from '../../components/common/StateBlock.vue'
 import { exchangeWeComCode } from '../../api/atlas'
-import { setSession } from '../../stores/session'
+import { clearSession, setSession } from '../../stores/session'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,6 +14,10 @@ const working = ref(true)
 async function handleCallback() {
   const code = String(route.query.code || '').trim()
   const state = String(route.query.state || '').trim() || undefined
+
+  clearSession()
+  error.value = ''
+  working.value = true
 
   if (!code) {
     error.value = '缺少授权 code，请返回登录页重新发起企业微信登录。'
@@ -32,6 +36,7 @@ async function handleCallback() {
     setSession(session)
     router.replace('/home')
   } catch (err) {
+    clearSession()
     error.value = err instanceof Error ? err.message : '登录失败'
     working.value = false
   }

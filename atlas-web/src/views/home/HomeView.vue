@@ -44,6 +44,11 @@ onMounted(async () => {
     <StateBlock v-else-if="error" tone="error" title="首页加载失败" :description="error" />
 
     <template v-else>
+      <section class="card section-gap muted-box">
+        <strong>⚠️ 首页仍是前端 mock / fallback 展示</strong>
+        <p>这里的指标、快捷入口与待办仅用于演示当前前端壳层，不应作为企业微信真实登录、角色权限或业务接口已联通的验收证据。</p>
+      </section>
+
       <section class="grid-cards section-gap">
         <article v-for="card in cards" :key="card.label" class="card metric-card">
           <small>{{ card.label }}</small>
