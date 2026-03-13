@@ -37,10 +37,10 @@ The next execution phase is now about separating **environment gating** from **e
    - without these, real WeCom acceptance cannot be truthfully closed
 
 #### P0/P1 — executable now without credentials
-1. **Freeze the acceptance wording and owner handoff**
-2. **Keep auth-first QA order fixed** so business-page checks do not get mistaken for auth acceptance
-3. **Tighten remaining fallback/masking exposure on key frontend pages**
-4. **Decide the exact verification boundary for approval-detail / RBAC / state-machine in Sprint 2**
+1. **Keep the acceptance wording and owner handoff frozen**
+2. **Preserve the already-landed QA auth-first order** so business-page checks do not get mistaken for auth acceptance
+3. **Treat frontend fallback/masking tightening as landed on the current branch unless a new failing retest appears**
+4. **Keep approval-detail / RBAC / state-machine classified as closed implementation scope with regression-only follow-up**
 5. **Sequence backend persistence as follow-up unless it directly blocks auth acceptance**
 
 ### 1.3 Current truth in one sentence
@@ -201,13 +201,12 @@ Must **not** own:
 ## 5. Next-step sequencing
 
 ### Sequence A — do now, no credentials required
-1. **Tech Lead:** freeze planning wording in this doc and aligned status docs.
-2. **Frontend:** close remaining masking-risk gaps on the four key pages, or make fallback state unmistakably explicit.
-3. **QA:** prepare the exact auth-first retest checklist, including regression checks for approval detail / RBAC / state-machine after auth source changes.
-4. **Backend:** continue persistence Phase 1 only if it stays behind the auth contract boundary and does not create a second competing acceptance track.
+1. **Tech Lead:** keep this doc and aligned status docs truthful to the current branch.
+2. **Do not respawn Frontend or QA** for fallback-tightening or auth-checklist work on the current baseline; those artifacts are already landed unless a new failing retest appears.
+3. **Backend:** continue persistence Phase 1 only if it stays behind the auth contract boundary and does not create a second competing acceptance track; otherwise wait for env readiness.
 
 Exit condition for Sequence A:
-- the team has one planning truth, one QA order, and no ambiguity about what still depends on credentials
+- the team has one planning truth, one QA order, no ambiguity about what still depends on credentials, and no accidental worker respawn on already-landed work
 
 ### Sequence B — start immediately once credentials/env are available
 1. **Backend + env owner:** confirm redirect URI, callback domain, and real secrets.
@@ -268,7 +267,7 @@ Required plan:
 ### Do now
 - use this file as the authoritative Tech Lead planning artifact
 - keep `docs/watchdog-status-next-steps-2026-03-12.md` aligned as a shorter status mirror
-- assign Frontend + QA work that does **not** require credentials
+- suppress new Frontend + QA worker spawns for already-landed fallback/auth-checklist work unless a fresh regression appears
 - keep Backend persistence work explicitly secondary to auth acceptance truth
 
 ### Do not do now

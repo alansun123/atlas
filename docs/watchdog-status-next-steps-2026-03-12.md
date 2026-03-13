@@ -21,10 +21,9 @@
 - real-env `probe:wecom-acceptance` evidence run
 
 #### Executable now without credentials
-- Tech Lead: freeze planning/owner handoff and keep docs aligned
-- Frontend: finish removing or clearly surfacing masking fallback on key pages
-- QA: prepare auth-first retest + regression pack
-- Backend: keep persistence Phase 1 isolated from the auth acceptance gate
+- Tech Lead: keep source-of-truth / watchdog wording aligned to current repo truth
+- Backend/env owner: wait for real WeCom credentials + callback environment, then execute the acceptance sequence without reopening closed Sprint 1 work
+- No additional Frontend or QA worker should be spawned from this status alone unless a new failing retest appears or the env blocker is removed
 
 ## 2. Correct wording for the remaining gap
 The remaining gap is:
@@ -37,20 +36,16 @@ The remaining gap is **not**:
 - backend WeCom callback still placeholder-only
 
 ## 3. Role owners
-- **Tech Lead:** source-of-truth planning, sequencing, owner handoff
-- **Frontend:** truthful error/fallback behavior on approval/schedule surfaces
+- **Tech Lead:** source-of-truth planning, sequencing, owner handoff, and watchdog suppression until a real trigger appears
+- **Frontend:** no new execution owner right now unless a fresh regression is found
 - **Backend:** real auth evidence once env exists; keep `req.user` contract stable
-- **QA:** auth-first verification order and regression verdicts
+- **QA:** execute the already-prepared auth-first verification order once env exists, or if a fresh regression appears
 
 ## 4. Next-step order
 ### Before credentials arrive
-1. Frontend finishes explicit masking/fallback surfacing on:
-   - approvals list
-   - approval detail
-   - manager schedule
-   - employee schedule
-2. QA prepares auth-first retest checklist and approval/RBAC/state-machine regression pack.
-3. Backend continues persistence Phase 1 only if it does not redefine auth acceptance.
+1. Tech Lead keeps planning/status wording aligned and prevents closed Sprint 1 work from being reopened as pseudo-P0.
+2. Do not spawn additional Frontend or QA workers solely for fallback/auth-checklist work; those artifacts have already landed on the current branch.
+3. Backend continues only truly independent work that does not redefine auth acceptance; otherwise wait for the real env blocker to clear.
 
 ### Once credentials/env arrive
 1. Backend/env owner confirms real secrets + redirect/callback alignment.
