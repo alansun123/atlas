@@ -73,6 +73,8 @@
 5. QA 对 approval-detail / RBAC / state-machine 做小范围回归验证
 6. Tech Lead 基于同一轮证据给出最终 acceptance verdict
 
+> 执行细化与证据打包格式，统一以 `docs/backend-wecom-real-acceptance-handoff-2026-03-13.md` 为准，避免真实环境到位后再次临时拼装执行步骤。
+
 ---
 
 ## 5. Short owner map
