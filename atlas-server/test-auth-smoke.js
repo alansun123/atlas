@@ -109,6 +109,18 @@ async function run() {
     assert.ok(weworkUrl.json.data.url.includes('state=test-state'));
     assert.ok(weworkUrl.json.data.url.includes(encodeURIComponent(process.env.WECOM_REDIRECT_URI)));
 
+    const overrideIgnoredByDefault = await request('/api/auth/wework/url?state=ignored-override&redirectUri=https%3A%2F%2Foverride.example.com%2Fcb');
+    assert.equal(overrideIgnoredByDefault.status, 200);
+    assert.equal(overrideIgnoredByDefault.json.data.redirectUri, process.env.WECOM_REDIRECT_URI);
+    assert.ok(!overrideIgnoredByDefault.json.data.url.includes(encodeURIComponent('https://override.example.com/cb')));
+
+    process.env.ATLAS_WECOM_ALLOW_REDIRECT_OVERRIDE = 'true';
+    const overrideAllowed = await request('/api/auth/wework/url?state=allowed-override&redirectUri=https%3A%2F%2Foverride.example.com%2Fcb');
+    assert.equal(overrideAllowed.status, 200);
+    assert.equal(overrideAllowed.json.data.redirectUri, 'https://override.example.com/cb');
+    assert.ok(overrideAllowed.json.data.url.includes(encodeURIComponent('https://override.example.com/cb')));
+    delete process.env.ATLAS_WECOM_ALLOW_REDIRECT_OVERRIDE;
+
     const activeCallback = await request('/api/auth/wework/callback', {
       method: 'POST',
       body: { code: 'active_manager_code' },

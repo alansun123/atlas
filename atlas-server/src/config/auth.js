@@ -21,7 +21,7 @@ function getWecomAuthConfig() {
   const redirectUri = process.env.WECOM_REDIRECT_URI || process.env.ATLAS_WECOM_REDIRECT_URI || '';
   const scope = process.env.WECOM_SCOPE || process.env.ATLAS_WECOM_SCOPE || 'snsapi_base';
   const state = process.env.WECOM_STATE || process.env.ATLAS_WECOM_STATE || 'atlas';
-  const allowRedirectOverride = parseBoolean(process.env.ATLAS_WECOM_ALLOW_REDIRECT_OVERRIDE, true);
+  const allowRedirectOverride = parseBoolean(process.env.ATLAS_WECOM_ALLOW_REDIRECT_OVERRIDE, false);
   const accessTokenUrl = process.env.WECOM_ACCESS_TOKEN_URL || process.env.ATLAS_WECOM_ACCESS_TOKEN_URL || 'https://qyapi.weixin.qq.com/cgi-bin/gettoken';
   const userInfoUrl = process.env.WECOM_USERINFO_URL || process.env.ATLAS_WECOM_USERINFO_URL || 'https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo';
   const userDetailUrl = process.env.WECOM_USER_DETAIL_URL || process.env.ATLAS_WECOM_USER_DETAIL_URL || 'https://qyapi.weixin.qq.com/cgi-bin/user/get';
