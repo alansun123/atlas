@@ -20,6 +20,15 @@ const { createUser } = require('./src/stores');
 
 const qaDb = new Database(path.join(__dirname, 'data/atlas.db'));
 const qaUserIds = [];
+const authEvents = [];
+const originalConsoleInfo = console.info;
+console.info = (...args) => {
+  const line = args.map((item) => String(item)).join(' ');
+  if (line.startsWith('[auth-event] ')) {
+    authEvents.push(line);
+  }
+  originalConsoleInfo(...args);
+};
 
 function cleanupQaUsers() {
   if (!qaUserIds.length) return;
@@ -85,24 +94,28 @@ async function run() {
   const wecomPort = wecomServer.address().port;
   const wecomBase = `http://127.0.0.1:${wecomPort}`;
 
-  async function request(path, { method = 'GET', token, body } = {}) {
+  async function request(path, { method = 'GET', token, body, requestId } = {}) {
     const res = await fetch(`${base}${path}`, {
       method,
       headers: {
         'content-type': 'application/json',
         ...(token ? { authorization: `Bearer ${token}` } : {}),
+        ...(requestId ? { 'x-request-id': requestId } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
     return {
       status: res.status,
+      requestId: res.headers.get('x-request-id'),
       json: await res.json(),
     };
   }
 
   try {
-    const weworkUrl = await request('/api/auth/wework/url?state=test-state');
+    const weworkUrl = await request('/api/auth/wework/url?state=test-state', { requestId: 'qa-auth-url-1' });
     assert.equal(weworkUrl.status, 200);
+    assert.equal(weworkUrl.requestId, 'qa-auth-url-1');
+    assert.equal(weworkUrl.json.requestId, 'qa-auth-url-1');
     assert.equal(weworkUrl.json.data.loginType, 'wecom');
     assert.equal(weworkUrl.json.data.mode, 'stub');
     assert.ok(weworkUrl.json.data.url.includes('open.weixin.qq.com/connect/oauth2/authorize'));
@@ -124,16 +137,22 @@ async function run() {
     const activeCallback = await request('/api/auth/wework/callback', {
       method: 'POST',
       body: { code: 'active_manager_code' },
+      requestId: 'qa-auth-callback-1',
     });
     assert.equal(activeCallback.status, 200);
+    assert.equal(activeCallback.requestId, 'qa-auth-callback-1');
+    assert.equal(activeCallback.json.requestId, 'qa-auth-callback-1');
     assert.ok(activeCallback.json.data.accessToken);
     assert.equal(activeCallback.json.data.loginType, 'wecom');
     assert.equal(activeCallback.json.data.user.id, 101);
 
     const me = await request('/api/auth/me', {
       token: activeCallback.json.data.accessToken,
+      requestId: 'qa-auth-me-1',
     });
     assert.equal(me.status, 200);
+    assert.equal(me.requestId, 'qa-auth-me-1');
+    assert.equal(me.json.requestId, 'qa-auth-me-1');
     assert.equal(me.json.data.id, 101);
 
     const malformedToken = `${activeCallback.json.data.accessToken.slice(0, -1)}x`;
@@ -215,8 +234,23 @@ async function run() {
     assert.equal(mockMe.status, 200);
     assert.equal(mockMe.json.data.id, 102);
 
+    const logout = await request('/api/auth/logout', {
+      method: 'POST',
+      token: activeCallback.json.data.accessToken,
+      requestId: 'qa-auth-logout-1',
+    });
+    assert.equal(logout.status, 200);
+    assert.equal(logout.requestId, 'qa-auth-logout-1');
+    assert.equal(logout.json.requestId, 'qa-auth-logout-1');
+    assert.equal(logout.json.data.tokenInvalidation, 'not_implemented_stateless_logout');
+
+    assert.ok(authEvents.some((line) => line.includes('"event":"wecom_callback_login_succeeded"') && line.includes('"requestId":"qa-auth-callback-1"')));
+    assert.ok(authEvents.some((line) => line.includes('"event":"auth_me_succeeded"') && line.includes('"requestId":"qa-auth-me-1"')));
+    assert.ok(authEvents.some((line) => line.includes('"event":"auth_logout_acknowledged"') && line.includes('"requestId":"qa-auth-logout-1"')));
+
     console.log('Auth smoke passed');
   } finally {
+    console.info = originalConsoleInfo;
     cleanupQaUsers();
     server.close();
     wecomServer.close();
@@ -224,6 +258,7 @@ async function run() {
 }
 
 run().catch((error) => {
+  console.info = originalConsoleInfo;
   console.error(error);
   process.exitCode = 1;
 });

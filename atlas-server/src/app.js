@@ -10,6 +10,7 @@ const leavesRouter = require('./modules/leaves');
 const approvalsRouter = require('./modules/approvals');
 const { attachUser } = require('./middlewares/auth');
 const { fail, success } = require('./utils/response');
+const { assignRequestId } = require('./utils/request-id');
 
 function createApp() {
   initDatabase();
@@ -29,6 +30,7 @@ function createApp() {
     next();
   });
   app.use(express.json());
+  app.use(assignRequestId);
   app.use(attachUser);
 
   app.get('/', (req, res) => {

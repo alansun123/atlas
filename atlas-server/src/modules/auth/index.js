@@ -4,6 +4,7 @@ const { requireAuth, buildUserPayload, isUserUsable } = require('../../middlewar
 const { success, fail } = require('../../utils/response');
 const { issueAccessToken, DEFAULT_TTL_SECONDS } = require('../../services/auth-token');
 const { exchangeCodeForIdentity, buildWecomOauthUrl } = require('../../services/wework-auth');
+const { logAuthEvent } = require('../../utils/auth-log');
 
 const router = express.Router();
 
@@ -77,6 +78,12 @@ router.get('/wework/url', (req, res) => {
   });
 
   if (!resolved.ok) {
+    logAuthEvent(req, 'wecom_oauth_url_failed', {
+      outcome: 'config_error',
+      mode: resolved.mode,
+      reason: resolved.reason,
+      missing: resolved.missing || [],
+    });
     return fail(res, 2001, '企业微信授权地址配置不完整', {
       reason: resolved.reason,
       mode: resolved.mode,
@@ -84,6 +91,12 @@ router.get('/wework/url', (req, res) => {
     }, 503);
   }
 
+  logAuthEvent(req, 'wecom_oauth_url_built', {
+    outcome: 'ok',
+    mode: resolved.mode,
+    configuredMode: resolved.configuredMode,
+    redirectOverrideApplied: Boolean(req.query.redirectUri && resolved.redirectUri === req.query.redirectUri),
+  });
   return success(res, {
     url: resolved.url,
     loginType: 'wecom',
@@ -104,11 +117,20 @@ router.post('/wework/callback', async (req, res) => {
   const { code } = req.body || {};
 
   if (!code) {
+    logAuthEvent(req, 'wecom_callback_failed', {
+      outcome: 'bad_request',
+      reason: 'missing-code',
+    });
     return fail(res, 1001, 'code 不能为空');
   }
 
   const resolved = await exchangeCodeForIdentity(code);
   if (!resolved.ok) {
+    logAuthEvent(req, 'wecom_callback_failed', {
+      outcome: 'identity_not_resolved',
+      mode: resolved.mode || null,
+      reason: resolved.reason,
+    });
     return fail(res, 2001, '企业微信登录失败，未能解析用户身份', {
       reason: resolved.reason,
       mode: resolved.mode || null,
@@ -121,29 +143,74 @@ router.post('/wework/callback', async (req, res) => {
   const user = db.users.find((item) => item.weworkUserId === identity.weworkUserId) || null;
 
   if (!user) {
+    logAuthEvent(req, 'wecom_callback_pending_access', {
+      outcome: 'pending_access',
+      mode: resolved.mode,
+      accessState: 'unmapped',
+      weworkUserId: identity.weworkUserId,
+    });
     return success(res, buildPendingAccessPayload(identity, 'unmapped'));
   }
 
   if (user.status !== 'active') {
+    logAuthEvent(req, 'wecom_callback_pending_access', {
+      outcome: 'pending_access',
+      mode: resolved.mode,
+      accessState: 'inactive',
+      userId: user.id,
+      weworkUserId: identity.weworkUserId,
+    });
     return success(res, buildPendingAccessPayload(identity, 'inactive'));
   }
 
   if (!isUserUsable(user)) {
+    logAuthEvent(req, 'wecom_callback_pending_access', {
+      outcome: 'pending_access',
+      mode: resolved.mode,
+      accessState: 'unusable',
+      userId: user.id,
+      weworkUserId: identity.weworkUserId,
+    });
     return success(res, buildPendingAccessPayload(identity, 'unusable'));
   }
 
+  logAuthEvent(req, 'wecom_callback_login_succeeded', {
+    outcome: 'authenticated',
+    mode: resolved.mode,
+    userId: user.id,
+    role: user.role,
+    weworkUserId: identity.weworkUserId,
+  });
   return success(res, issueSessionForUser(user, 'wecom', {
     wecomMode: resolved.mode,
   }));
 });
 
-router.get('/me', requireAuth, (req, res) => success(res, req.user));
+router.get('/me', requireAuth, (req, res) => {
+  logAuthEvent(req, 'auth_me_succeeded', {
+    outcome: 'authenticated',
+    userId: req.user.id,
+    role: req.user.role,
+    loginType: req.auth?.tokenPayload?.loginType || null,
+    weworkUserId: req.user.weworkUserId,
+  });
+  return success(res, req.user);
+});
 
-router.post('/logout', requireAuth, (req, res) => success(res, {
+router.post('/logout', requireAuth, (req, res) => {
+  logAuthEvent(req, 'auth_logout_acknowledged', {
+    outcome: 'stateless_ack',
+    userId: req.user.id,
+    role: req.user.role,
+    loginType: req.auth?.tokenPayload?.loginType || null,
+    weworkUserId: req.user.weworkUserId,
+  });
+  return success(res, {
   success: true,
   loggedOutUserId: req.user.id,
   tokenInvalidation: 'not_implemented_stateless_logout',
   expiresIn: DEFAULT_TTL_SECONDS,
-}));
+});
+});
 
 module.exports = router;

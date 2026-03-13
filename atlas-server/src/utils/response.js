@@ -1,6 +1,6 @@
-function createMeta() {
+function createMeta(res) {
   return {
-    requestId: `trace_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    requestId: res?.locals?.requestId || `trace_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     timestamp: Date.now(),
   };
 }
@@ -10,7 +10,7 @@ function success(res, data = {}, message = 'ok', status = 200) {
     code: 0,
     message,
     data,
-    ...createMeta(),
+    ...createMeta(res),
   });
 }
 
@@ -19,7 +19,7 @@ function fail(res, code, message, data = {}, status = 400) {
     code,
     message,
     data,
-    ...createMeta(),
+    ...createMeta(res),
   });
 }
 
