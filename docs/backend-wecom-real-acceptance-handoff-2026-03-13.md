@@ -18,6 +18,8 @@ The next unblock is one **real-environment, evidence-backed acceptance run** wit
 
 This handoff turns that next run into a concrete backend/env packet.
 
+Companion execution checklist: `docs/backend-wecom-env-owner-preflight-checklist-2026-03-13.md`
+
 ---
 
 ## 2. Scope guardrails
