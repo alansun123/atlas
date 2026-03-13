@@ -75,3 +75,4 @@ The remaining gap is **not**:
 ## 5. Most important unblocker
 > 当前首要阻塞是：**缺真实 WeCom 环境凭证与 callback 条件**。  
 > 当前首要非阻塞执行项是：**仅保持 source-of-truth / handoff 文档与当前分支一致；不要因状态文案而默认重开 Frontend / QA / Backend 执行。**
+- 21:23 watchdog tick rechecked active Atlas sessions, repo head, and the env-owner preflight packet: no Atlas role worker is active, the working tree remains clean on `techlead/watchdog-followup-20260312`, latest branch-head movement is still watchdog/doc maintenance only (`9957d2e`, `9cb1e20`, `dc32acc`, `0e4799f`, `3f01423`), and there is still no fresh regression, implementation delta, or real WeCom env-unblock signal that changes the next-step order.
