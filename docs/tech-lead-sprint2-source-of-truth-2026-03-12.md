@@ -124,23 +124,18 @@ These cannot be completed truthfully without external input:
 5. Final evidence bundle from `npm run probe:wecom-acceptance` using real callback codes
 
 ### 3.2 Executable now without credentials
-These can and should proceed immediately:
+These are the only role-correct actions that remain open before real credentials arrive:
 
 1. **Tech Lead**
-   - freeze this source-of-truth document
-   - keep all planning docs aligned to this wording
+   - keep this source-of-truth document and status mirrors aligned to current repo truth
    - prevent closed Sprint 1 work from being reopened as fake urgency
-2. **Frontend**
-   - finish any remaining explicit fallback/error surfacing on the four key pages
-   - ensure mock/home fallback is visibly non-acceptance
-   - avoid silent success appearance on auth/API failure
-3. **Backend**
+2. **Backend / env owner**
    - preserve the auth contract boundary already landed
-   - support the acceptance evidence flow and keep probe usage/documentation stable
-   - continue persistence Phase 1 only in a way that does not redefine auth acceptance or break `req.user` compatibility
-4. **QA**
-   - prepare the exact auth-first retest order and evidence checklist
-   - preserve the distinction between regression coverage and real-env acceptance
+   - keep the acceptance evidence flow, probe usage, and handoff/runbook stable until env inputs arrive
+   - continue only truly independent follow-up (for example, persistence hardening already landed in `11eca30`) that does not redefine auth acceptance or break `req.user` compatibility
+3. **Frontend / QA**
+   - no default respawn from status alone
+   - act only if a fresh failing regression appears, or once real env-backed acceptance becomes executable
 
 ---
 
@@ -298,7 +293,6 @@ If wording conflicts, **this file wins**.
 - **real WeCom credentials + callback environment**
 
 ### Highest-value executable work before credentials arrive
-- **Frontend:** make fallback/error state unmistakable on approval/schedule paths
-- **QA:** prepare auth-first retest + regression pack for approval-detail / RBAC / state-machine under real-auth identities
-- **Backend:** keep persistence Phase 1 isolated from auth acceptance gate
 - **Tech Lead:** keep every planning/status doc aligned to this exact execution order
+- **Backend / env owner:** keep the real-acceptance handoff stable and wait for credentials / callback environment
+- **Frontend / QA:** do not respawn from status alone; only re-enter on fresh regression evidence or once real-env acceptance is actually unblocked

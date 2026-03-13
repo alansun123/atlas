@@ -62,4 +62,4 @@ The remaining gap is **not**:
 
 ## 5. Most important unblocker
 > 当前首要阻塞是：**缺真实 WeCom 环境凭证与 callback 条件**。  
-> 当前首要非阻塞执行项是：**把 fallback/masking 风险和 QA 验证顺序彻底讲清并收紧。**
+> 当前首要非阻塞执行项是：**仅保持 source-of-truth / handoff 文档与当前分支一致；不要因状态文案而默认重开 Frontend / QA / Backend 执行。**
