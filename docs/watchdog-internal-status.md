@@ -1,6 +1,6 @@
 # Atlas Watchdog Status
 
-**Last Check:** 2026-03-13 17:38 GMT+8
+**Last Check:** 2026-03-13 17:43 GMT+8
 
 ## Status: Sprint 1 COMPLETED ✅ — Waiting on WeCom Credentials
 
@@ -19,7 +19,7 @@
 ### Current State
 - No active Atlas subagents
 - Repo branch: `techlead/watchdog-followup-20260312`
-- Current check confirms `main` remains ahead on implementation (`fc87dd5 atlas-web: expose approval fallback and session failures`), while this watchdog branch remains doc-only tracking
+- Current check confirms `main` is already an ancestor of this watchdog branch; `fc87dd5 atlas-web: expose approval fallback and session failures` should be treated as a historical QA reference point, not as an outstanding implementation delta that reopens current scope
 - Latest relevant implementation commits:
   - `61b0315 fix(web): make auth fallback states truthful`
   - `382d4a8 feat(atlas-server): add auth request tracing logs`
@@ -41,8 +41,8 @@
 - `docs/WECOM_INTEGRATION_PLAN.md` exists and remains the integration plan reference
 - Backend and docs reflect the current auth-first baseline; latest backend implementation delta is `382d4a8 feat(atlas-server): add auth request tracing logs`, which improves real-env acceptance evidence capture without reopening Sprint 1 scope
 - Active Atlas subagents this tick: none
-- Latest relevant implementation commits remain `61b0315` (frontend auth truthfulness), `382d4a8` (backend tracing), and repo `main` currently carries later UI fallback/session-failure exposure work at `fc87dd5`
-- QA evidence for `fc87dd5` is now captured in `docs/qa-fc87dd5-approval-fallback-session-check-2026-03-13.md`: read-path truthfulness improved, but the approval action mutation-path session guard was still incomplete in that commit and was later addressed by `61b0315`
+- Latest relevant implementation commits remain `61b0315` (frontend auth truthfulness) and `382d4a8` (backend tracing); `fc87dd5` is retained only as historical QA nuance beneath the current baseline, not as newer active implementation scope
+- QA evidence for `fc87dd5` is now captured in `docs/qa-fc87dd5-approval-fallback-session-check-2026-03-13.md`: it records a historical intermediate state where read-path truthfulness improved, but the approval action mutation-path session guard was still incomplete and was later addressed by `61b0315`
 - Working tree delta at check time was clean
 - No fresh failing regression or new env credentials were found this tick, so no role worker was respawned
 
