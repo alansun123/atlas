@@ -1,6 +1,6 @@
 # Atlas Watchdog Status
 
-**Last Check:** 2026-03-13 18:08 GMT+8
+**Last Check:** 2026-03-13 18:48 GMT+8
 
 ## Status: Sprint 1 COMPLETED ✅ — Waiting on WeCom Credentials
 
@@ -28,6 +28,7 @@
   - `11eca30` — backend persistence user-id restart-safety hardening + backend smoke evidence
   - `421787f` — tech-lead real WeCom acceptance handoff/runbook alignment
   - `c9fd93e` — QA head regression evidence pack on current branch head
+  - `aa4a0d5` — QA deeper mock/auth-first regression retest evidence on the latest watchdog branch head
 - Working tree delta at check time: clean
 - Real WeCom auth remains blocked in live acceptance until real env is provided; redirect override now defaults OFF and should be enabled only for explicit local smoke tests
 - Required real-acceptance env remains unavailable in the shared acceptance environment: `ATLAS_AUTH_TOKEN_SECRET`, `WECOM_CORP_ID`, `WECOM_AGENT_ID`, `WECOM_SECRET`, `WECOM_REDIRECT_URI`
