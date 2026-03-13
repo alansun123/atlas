@@ -19,7 +19,7 @@
 ### Current State
 - No active Atlas subagents
 - Repo branch: `techlead/watchdog-followup-20260312`
-- Latest relevant implementation commit: `0124605 backend(auth): default wecom redirect override off`
+- Latest relevant implementation commit: `382d4a8 feat(atlas-server): add auth request tracing logs`
 - Current repo posture: later repo-head movement may be watchdog/planning doc maintenance only and is not, by itself, a stale-status trigger
 - Working tree delta at check time: clean
 - Real WeCom auth remains blocked in live acceptance until real env is provided; redirect override now defaults OFF and should be enabled only for explicit local smoke tests
@@ -28,16 +28,16 @@
 ### Watchdog Assessment
 - Sprint 1 closure work remains closed; do not reopen approval-detail / RBAC / state-machine as active implementation scope without a fresh failing regression
 - QA auth-first retest checklist is ready and aligned with Sprint 2 auth-first order
-- WeCom integration planning is documented in `docs/WECOM_INTEGRATION_PLAN.md` and related Sprint 2 source-of-truth docs
+- WeCom integration planning is documented in `docs/WECOM_INTEGRATION_PLAN.md` and related Sprint 2 source-of-truth docs; the plan is now aligned as a current-state acceptance document rather than an open implementation checklist
 - Redirect-override URLs are no longer a default/shared path and must not be treated as a worker trigger by themselves
 - No worker spawn needed until real credentials / callback environment arrive, or a new failing regression appears
 
 ### Verified Evidence This Tick
 - `docs/qa-auth-first-retest-checklist.md` still marks real-mode acceptance as blocked on credentials
 - `docs/WECOM_INTEGRATION_PLAN.md` exists and remains the integration plan reference
-- Backend and docs still reflect stub-capable current state; no new implementation delta appeared that requires reassignment
+- Backend and docs reflect the current auth-first baseline; latest backend implementation delta is `382d4a8 feat(atlas-server): add auth request tracing logs`, which improves real-env acceptance evidence capture without reopening Sprint 1 scope
 - Active Atlas subagents this tick: none
-- Latest relevant implementation commit remains `0124605 backend(auth): default wecom redirect override off`
+- Latest relevant implementation commit remains `382d4a8 feat(atlas-server): add auth request tracing logs`
 - Working tree delta at check time was clean
 
 ### Next Trigger

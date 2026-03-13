@@ -10,8 +10,9 @@
 ### Closed / no longer active P0
 - Sprint 1 mock MVP retest: PASS / demo-ready
 - approval-detail hardening + RBAC/state-machine hardening: PASS for intended Sprint 1 scope
-- Sprint 2 backend auth contract: stub/integration PASS
+- Sprint 2 backend auth contract + probe support: landed on current baseline
 - frontend real-auth-first skeleton: landed
+- latest relevant implementation commit: `382d4a8 feat(atlas-server): add auth request tracing logs`
 
 ### Still open
 #### Blocked by user/env
@@ -24,6 +25,7 @@
 #### Executable now without credentials
 - Tech Lead: keep source-of-truth / watchdog wording aligned to current repo truth
 - Backend/env owner: wait for real WeCom credentials + callback environment, then execute the acceptance sequence without reopening closed Sprint 1 work
+- Frontend/QA: treat current remaining work as regression-only follow-up, not a default respawn trigger
 - No additional Frontend or QA worker should be spawned from this status alone unless a new failing retest appears or the env blocker is removed
 
 ## 2. Correct wording for the remaining gap
