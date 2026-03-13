@@ -19,6 +19,7 @@
 - confirmed callback/redirect environment
 - real mapped identities + one pending-access identity
 - real-env `probe:wecom-acceptance` evidence run
+- redirect override is no longer assumed available by default; shared-env acceptance must use the configured callback path, with override enabled only for explicit local smoke tests
 
 #### Executable now without credentials
 - Tech Lead: keep source-of-truth / watchdog wording aligned to current repo truth

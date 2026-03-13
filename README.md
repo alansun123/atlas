@@ -39,6 +39,7 @@
 
 ## 当前 Sprint 口径
 
-- **Sprint 1 验收口径**：以 mock MVP 可演示收口为准，不以真实 WeCom 登录交付为阻塞。
-- **Sprint 1 剩余 gate**：完成一轮最终 mock E2E / QA retest，并确认审批详情、RBAC、批次状态流在真实联调中稳定。
-- **Sprint 2 起点**：进入 WeCom OAuth、用户映射、回调域名配置、持久化与请假/通知集成。
+- **Sprint 1 状态**：已按 mock MVP 可演示口径完成收口；Sprint 1 closure 保持关闭，不因后续 WeCom 联调重新打开。
+- **非当前实现范围**：approval-detail / RBAC / 批次状态流当前仅保留“真实认证切换后的回归验证”属性；若无新的失败回归，不作为活跃实现范围。
+- **Sprint 2 当前主阻塞**：真实 WeCom 环境验收仍受限于凭证、回调/域名环境与测试身份映射。
+- **Sprint 2 当前起点**：进入 WeCom OAuth、用户映射、回调域名配置与基础持久化；其中 redirect override 现默认关闭，仅允许在明确的本地 smoke test 中临时启用，不能作为共享环境验收路径。

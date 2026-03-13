@@ -34,6 +34,7 @@ The next execution phase is now about separating **environment gating** from **e
    - missing real `WECOM_CORP_ID / WECOM_AGENT_ID / WECOM_SECRET`
    - missing confirmed redirect/callback environment
    - missing real test identities and confirmed `weworkUserId -> Atlas user` mappings
+   - `ATLAS_WECOM_ALLOW_REDIRECT_OVERRIDE` now defaults **OFF** on the current backend baseline; only explicit local smoke tests should enable it temporarily
    - without these, real WeCom acceptance cannot be truthfully closed
 
 #### P0/P1 — executable now without credentials
@@ -275,6 +276,7 @@ Required plan:
 - do not reopen approval-detail / RBAC / state-machine as feature implementation scope
 - do not treat fallback-visible pages as acceptance evidence
 - do not let persistence become a second ambiguous P0 before real auth is evidenced
+- do not use redirect-override-based auth URLs as shared-env or final acceptance evidence; that path is now opt-in local smoke only
 
 ---
 
