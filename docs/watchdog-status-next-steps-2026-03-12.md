@@ -1,9 +1,10 @@
 # Atlas Watchdog Status + Next Steps
 
 > 状态镜像（status mirror）  
-> 更新时间：2026-03-12 23:12 GMT+8  
+> 更新时间：2026-03-13 19:32 GMT+8  
 > 维护角色：Tech Lead / Watchdog  
-> 权威 planning 文档：`docs/tech-lead-sprint2-source-of-truth-2026-03-12.md`
+> 权威 planning 文档：`docs/tech-lead-sprint2-source-of-truth-2026-03-12.md`  
+> 最新 backend/env 执行清单：`docs/backend-wecom-env-owner-preflight-checklist-2026-03-13.md`
 
 ## 1. Current repo truth
 
@@ -26,9 +27,9 @@
 
 #### Executable now without credentials
 - Tech Lead: keep source-of-truth / watchdog wording aligned to current repo truth
-- Backend/env owner: wait for real WeCom credentials + callback environment, then execute the acceptance sequence without reopening closed Sprint 1 work
+- Backend/env owner: use `docs/backend-wecom-env-owner-preflight-checklist-2026-03-13.md` as the frozen preflight packet, but do not start the real acceptance run until credentials + callback environment + mapped identities are actually ready
 - Frontend/QA: treat current remaining work as regression-only follow-up, not a default respawn trigger
-- No additional Frontend or QA worker should be spawned from this status alone unless a new failing retest appears or the env blocker is removed
+- No additional Frontend, Backend, or QA worker should be spawned from this status alone unless a new failing retest appears or the env blocker is removed
 
 ## 2. Correct wording for the remaining gap
 The remaining gap is:
