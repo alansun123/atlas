@@ -69,10 +69,39 @@ Need user to provide WeCom credentials or confirm to proceed with planning witho
 - 2026-03-15 11:38: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
 - 2026-03-15 12:03: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
 - 2026-03-15 12:23: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
+- 2026-03-15 12:43: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
+- 2026-03-15 12:54: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
+- 2026-03-15 13:04: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
+- 2026-03-15 13:09: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
+- 2026-03-15 13:14: Status unchanged - Sprint2 still blocked on WeCom env handoff, no workers needed
+- 2026-03-15 13:19: Status unchanged - Sprint2 still blocked on WeCom env handoff (24+ hours), but source-of-truth notes P0/P1 items executable without credentials
 
 ---
-## 12:23 tick (2026-03-15)
+## 13:19 tick (2026-03-15)
 - No active workers
-- Sprint1: complete
-- Sprint2: blocked on WeCom env handoff (no change for 24+ hours)
-- No new work to spawn - waiting on Karl for WeCom credentials
+- Sprint1: complete  
+- Sprint2: blocked on WeCom env handoff (24+ hours)
+- NOTE: Tech Lead source-of-truth doc indicates executable P0/P1 items without credentials (planning, backend persistence, frontend masking). Consider resuming work.
+- No workers spawned this tick
+
+## Tech Lead Decision (2026-03-15 13:21 GMT+8)
+
+**Decision: STAY IDLE - No workers to spawn**
+
+### Reasoning
+Per `tech-lead-sprint2-source-of-truth-2026-03-12.md`:
+1. **Frontend/QA work is already LANDED** - fallback-tightening, auth checklist, approval-detail RBAC all passed retest. Do NOT respawn workers for already-completed work.
+2. **Backend persistence** can continue only if it stays behind auth contract boundary and doesn't create competing acceptance track - but this is low priority vs real auth acceptance.
+3. **True blocker**: Real WeCom credentials + callback environment required for Sprint 2 acceptance.
+4. **Trigger to resume**: Only when credentials arrive OR fresh regression appears.
+
+### Next Steps
+- Stay IDLE until WeCom credentials provided
+- Tech Lead will keep docs aligned to current truth
+- Watchdog continues periodic checks silently
+
+---
+## 13:25 tick (2026-03-15)
+- Status unchanged
+- Tech Lead decision: STAY IDLE - source-of-truth confirms no executable work requiring worker spawn
+- No workers needed
