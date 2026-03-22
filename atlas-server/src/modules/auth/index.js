@@ -111,9 +111,63 @@ router.get('/wework/url', (req, res) => {
 });
 
 router.post('/mock-login', handleMockLogin);
+
+router.get('/wework/qr', (req, res) => {
+  const corpId = process.env.WECOM_CORP_ID;
+  const agentId = process.env.WECOM_AGENT_ID;
+  
+  if (!corpId || !agentId) {
+    return fail(res, 2001, '企业微信配置不完整', {}, 503);
+  }
+  
+  const callbackUrl = encodeURIComponent(process.env.WECOM_REDIRECT_URI || 'https://atlas-atlas.loca.lt/auth/callback');
+  const state = Math.random().toString(36).substring(2);
+  
+  const qrUrl = `https://open.work.weixin.qq.com/wwopen/sso/3rd_qrconnect?appid=${corpId}&agentid=${agentId}&redirect_uri=${callbackUrl}&state=${state}`;
+  
+  logAuthEvent(req, 'wecom_qr_url_built', { outcome: 'ok', state });
+  
+  return success(res, { qrUrl, state, expiresIn: 300 });
+});
 router.post('/mock/login', handleMockLogin);
 
 router.post('/wework/callback', async (req, res) => {
+
+router.get('/wework/callback', async (req, res) => {
+  const code = String(req.query.code || '' ).trim();
+  const state = String(req.query.state || '' ).trim();
+  
+  if (!code) {
+    logAuthEvent(req, 'wecom_callback_failed', { outcome: 'bad_request', reason: 'missing-code' });
+    return fail(res, 1001, 'code 不能为空');
+  }
+  
+  const resolved = await exchangeCodeForIdentity(code);
+  if (!resolved.ok) {
+    logAuthEvent(req, 'wecom_callback_failed', { outcome: 'identity_not_resolved', mode: resolved.mode || null, reason: resolved.reason });
+    return fail(res, 2001, '企业微信登录失败，未能解析用户身份', { reason: resolved.reason, mode: resolved.mode || null }, 401);
+  }
+  
+  const identity = resolved;
+  const existingUser = db.users.find(u => u.weworkUserId === identity.weworkUserId);
+  
+  if (!existingUser) {
+    const pendingPayload = buildPendingAccessPayload(identity, 'not_found');
+    logAuthEvent(req, 'wecom_callback_new_user', { weworkUserId: identity.weworkUserId, name: identity.name });
+    return res.redirect(`https://atlas-atlas.loca.lt/pending-access?weworkUserId=${encodeURIComponent(identity.weworkUserId)}`);
+  }
+  
+  if (existingUser.status !== 'active' || !isUserUsable(existingUser)) {
+    const pendingPayload = buildPendingAccessPayload(identity, existingUser.status !== 'active' ? 'inactive' : 'unusable');
+    logAuthEvent(req, 'wecom_callback_inactive_user', { weworkUserId: identity.weworkUserId });
+    return res.redirect(`https://atlas-atlas.loca.lt/pending-access?weworkUserId=${encodeURIComponent(identity.weworkUserId)}`);
+  }
+  
+  const session = issueSessionForUser(existingUser, 'wecom');
+  logAuthEvent(req, 'wecom_callback_ok', { userId: existingUser.id, weworkUserId: identity.weworkUserId });
+  
+  return res.redirect(`https://atlas-atlas.loca.lt/home?token=${encodeURIComponent(session.accessToken)}`);
+});
   const { code } = req.body || {};
 
   if (!code) {

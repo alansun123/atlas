@@ -115,6 +115,11 @@ export async function fetchWeComAuthUrl() {
   return url
 }
 
+export async function fetchWeComQrUrl() {
+  const data = await apiRequest<any>('/auth/wework/qr')
+  return data?.qrUrl || ''
+}
+
 export async function exchangeWeComCode(code: string, state?: string) {
   const data = await apiRequest<any>('/auth/wework/callback', {
     method: 'POST',

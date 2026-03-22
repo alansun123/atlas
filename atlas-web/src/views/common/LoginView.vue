@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppShell from '../../components/common/AppShell.vue'
-import { fetchWeComAuthUrl, isMockLoginEnabled, isWeComEnvironment } from '../../api/atlas'
+import { fetchWeComAuthUrl, fetchWeComQrUrl, isMockLoginEnabled, isWeComEnvironment } from '../../api/atlas'
 import { loginAs, sessionStore } from '../../stores/session'
 
 const router = useRouter()
@@ -26,6 +26,20 @@ const startWeComLogin = async () => {
     window.location.href = authUrl
   } catch (err) {
     error.value = err instanceof Error ? err.message : '获取企业微信授权地址失败'
+    loading.value = false
+  }
+}
+
+const startWeComQrLogin = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const qrUrl = await fetchWeComQrUrl()
+    // Open QR code page in new window
+    window.open(qrUrl, '_blank', 'width=500,height=600')
+    loading.value = false
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '获取企业微信二维码失败'
     loading.value = false
   }
 }
@@ -57,7 +71,11 @@ const quickLogin = async (role: 'employee' | 'manager' | 'operation') => {
       <button class="primary-btn" :disabled="loading" @click="startWeComLogin">
         {{ loading ? '正在跳转授权…' : '企业微信登录' }}
       </button>
+      <button class="secondary-btn" :disabled="loading" @click="startWeComQrLogin">
+        {{ loading ? '正在打开…' : '二维码扫码登录' }}
+      </button>
       <small v-if="error" style="color:#d33">{{ error }}</small>
+      <small class="muted" style="margin-top:8px">扫码后需在企业微信 App 内确认授权</small>
     </section>
 
     <section v-if="mockEnabled" class="card muted-box section-gap">

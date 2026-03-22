@@ -1,7 +1,7 @@
 # Atlas Project Status
 
-**Last updated:** 2026-03-23 05:47 CST
-**Watchdog state:** ACTIVE — Sprint2 unblocked, WeCom credentials received
+**Last updated:** 2026-03-23 07:17 CST
+**Watchdog state:** ACTIVE — Sprint2 in progress, WeCom QR OAuth implemented
 
 ---
 
@@ -29,18 +29,22 @@ All P0/P1 items landed. Mock E2E retest passed 2026-03-12.
 - `Secret`: provisioned (in `.env`)
 - Credentials written to `atlas-server/.env` and `atlas-web/.env`
 
-**Current state (2026-03-22):**
-- WeCom OAuth code partially implemented (working tree)
-- `SPRINT2.md` created as planning artifact
-- Auth routes: `/wework/qr`, `/wework/callback` (GET) implemented
-- Login view updated with WeCom login button
-- User identity exchange flow in progress
+**Current state (2026-03-23):**
+- WeCom QR OAuth flow fully implemented in working tree
+- `GET /wework/qr` — builds QR connect URL, returns `qrUrl` + `state` (expires 5min)
+- `GET /wework/callback` — exchanges code for WeCom user identity, handles:
+  - Existing active user → issues session, redirects to `/home?token=...`
+  - New user → redirects to `/pending-access?weworkUserId=...`
+  - Inactive/unusable user → redirects to `/pending-access` with status reason
+- Frontend LoginView updated with QR code login button (opens `open.work.weixin.qq.com` QR in popup)
+- `fetchWeComQrUrl()` added to frontend API layer
+- `dotenv` loaded in `app.js` for env var access
 
 **Pending tasks (P0):**
-- [ ] Complete WeCom OAuth callback (POST variant)
-- [ ] User table / first-login auto-create
-- [ ] Frontend OAuth redirect handling
-- [ ] Integration test
+- [ ] `POST /wework/callback` variant (for direct API callers)
+- [ ] `/pending-access` page UI (first-login user onboarding)
+- [ ] Frontend popup → main window token传递 (postMessage or polling)
+- [ ] Integration test with real WeCom OAuth flow
 
 ---
 

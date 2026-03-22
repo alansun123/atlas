@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { initDatabase, seedInitialData } = require('./data/db');
 const healthRouter = require('./routes/health');
