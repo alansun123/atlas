@@ -1,0 +1,4 @@
+tick: 2026-03-20 08:05 UTC
+status: IDLE - Sprint1 complete, Sprint2 blocked on WeCom env handoff (100+ hours)
+workers: none (no credentials = no work possible)
+note: All P0/P1 items (approval detail/RBAC/state machine/mock E2E retest) already LANDED in Sprint1. Sprint2 requires WeCom credentials from Karl.

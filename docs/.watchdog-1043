@@ -1,0 +1,4 @@
+tick: 2026-03-20 02:44 UTC
+status: IDLE - Sprint2 still blocked on WeCom env handoff (100+ hours), no workers needed
+workers: none (waiting for Karl to provide WECOM_CORP_ID/AGENT_ID/SECRET)
+note: All P0/P1 items (approval detail/RBAC/state machine/mock E2E retest) already LANDED in Sprint1
