@@ -1,7 +1,7 @@
 # Atlas Project Status
 
-**Last updated:** 2026-03-23 07:17 CST
-**Watchdog state:** ACTIVE — Sprint2 in progress, WeCom QR OAuth implemented
+**Last updated:** 2026-04-06 01:53 CST
+**Watchdog state:** ACTIVE — Sprint2 in progress, WeCom QR OAuth implemented; WeCom handoff blocker resolved 2026-03-22
 
 ---
 
@@ -29,7 +29,10 @@ All P0/P1 items landed. Mock E2E retest passed 2026-03-12.
 - `Secret`: provisioned (in `.env`)
 - Credentials written to `atlas-server/.env` and `atlas-web/.env`
 
-**Current state (2026-03-23):**
+**Current state (2026-04-06 01:53 CST — no new commits since 2026-03-23):**
+- atlas-web: running (port :3000, Next.js)
+- atlas-server: **STOPPED** (port :4700) — not listening, may need manual restart
+- PostgreSQL: running (Docker, port :5432)
 - WeCom QR OAuth flow fully implemented in working tree
 - `GET /wework/qr` — builds QR connect URL, returns `qrUrl` + `state` (expires 5min)
 - `GET /wework/callback` — exchanges code for WeCom user identity, handles:
