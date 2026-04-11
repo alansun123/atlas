@@ -1,14 +1,14 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-04-11 20:52 CST
-> Watchdog: atlas-watchdog-5m cron — tick 2026-04-11T1252Z
+> Last updated: 2026-04-12 03:26 CST
+> Watchdog: atlas-watchdog-5m cron — tick 2026-04-11T1926Z
 
 ## Head
-`0057551` ("docs(atlas): watchdog 2026-04-11T0249Z — server PID 65375, stable since last tick") — 2026-04-11 10:49 CST on `main` (synced from origin)
+`ee25095` ("docs(atlas): watchdog 2026-04-11T1252Z — server PID 99367, PID changed from 65375, still healthy") — 2026-04-11 12:54 CST on `main` (synced from origin)
 
 ## Commits since last watchdog check
+- `ee25095` committed by watchdog run at 20:54 CST: server PID 99367, PID changed from 65375, still healthy
 - `0057551` committed by watchdog run at 10:49 CST: server PID 65375, stable since last tick
-- `1d6fec4` noted PID 65375 confirmed healthy; restart from prior PID 86230→65375
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
@@ -22,7 +22,7 @@
 - `docs/tech-lead-sprint2-source-of-truth-2026-03-12.md` is the current single source of truth
 
 ## Server Status
-- ✅ **atlas-server is healthy** — PID 99367 confirmed on :3100 (`{"code":0,"message":"Atlas backend mock API is running"}`) — PID changed from 65375 (noted at 10:49 CST), no restart detected by this watchdog
+- ✅ **atlas-server is healthy** — PID 99367 confirmed on :3100 (`{"code":0,"message":"Atlas backend mock API is running"}`) — stable since prior tick, no restart detected
 - Docker services (PostgreSQL :5432, Redis :6379, http-alt :8080) — assumed up (daemon running)
 - Head `0057551` confirmed clean; no new commits since last watchdog
 
