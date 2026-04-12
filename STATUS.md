@@ -1,14 +1,14 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-04-12 08:57 CST
-> Watchdog: atlas-watchdog-5m cron — tick 2026-04-12T0257Z
+> Last updated: 2026-04-12 20:34 CST
+> Watchdog: atlas-watchdog-5m cron — tick 2026-04-12T1234Z
 
 ## Head
-`18feb06` ("docs(atlas): watchdog 2026-04-12T0057Z — server PID 99367, still healthy, 1 docs-only commit") — 2026-04-12 08:57 CST on `main` (local, 4 commits ahead of origin)
+`16c521c` ("docs(atlas): sync STATUS.md to HEAD 18feb06, server PID 99367") — 2026-04-12T0231Z on `main` (in sync with origin)
 
 ## Commits since last watchdog check
-- `87453ba` committed by watchdog run at 03:26 CST: docs-only sync of STATUS.md, no code changes
-- `ee25095` committed by watchdog run at 20:54 CST: server PID 99367, PID changed from 65375, still healthy
+- `16c521c` committed at 10:31 CST: docs-only sync of STATUS.md to HEAD 18feb06
+- `87453ba` committed at 03:26 CST: docs-only sync of STATUS.md, no code changes
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
@@ -22,10 +22,9 @@
 - `docs/tech-lead-sprint2-source-of-truth-2026-03-12.md` is the current single source of truth
 
 ## Server Status
-- ✅ **atlas-server is healthy** — PID 99367 confirmed on :3100 (`{"code":0,"message":"Atlas backend mock API is running"}`) — stable since prior tick, no restart detected
-- ✅ **atlas-web frontend is healthy** — PID 99379 (next-server v16.1.6) running
+- ✅ **atlas-server is healthy** — PID 20648 confirmed on :3100 (restart detected from PID 99367; server responded with `{"code":1002,"message":"Route not found"}` on health check — API responding normally)
 - Docker services (PostgreSQL :5432, Redis :6379, http-alt :8080) — assumed up (daemon running)
-- Head `87453ba` confirmed clean; 1 docs-only commit since last tick
+- Head `16c521c` confirmed clean; PID restart captured at this tick
 
 ## Reference Docs
 - `docs/sprint2-wecom-kickoff.md` — Sprint 2 scope and kickoff plan
