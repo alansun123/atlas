@@ -1,14 +1,13 @@
 # Atlas Watchdog Status
 
 > Last updated: 2026-04-12 20:34 CST
-> Watchdog: atlas-watchdog-5m cron — tick 2026-04-12T1234Z
+> Watchdog: atlas-watchdog-5m cron — tick 2026-04-12T1634Z
 
 ## Head
-`16c521c` ("docs(atlas): sync STATUS.md to HEAD 18feb06, server PID 99367") — 2026-04-12T0231Z on `main` (in sync with origin)
+`a4062d2` ("docs(atlas): watchdog 2026-04-12T1234Z — server PID 20648 (restart from 99367), still healthy") — 2026-04-12T1234Z on `main` (local only, not yet pushed to origin)
 
 ## Commits since last watchdog check
-- `16c521c` committed at 10:31 CST: docs-only sync of STATUS.md to HEAD 18feb06
-- `87453ba` committed at 03:26 CST: docs-only sync of STATUS.md, no code changes
+- `a4062d2` committed at 20:34 CST: server PID updated to 20648 (restart from 99367), still healthy; previous tick's commit `16c521c` now superseded locally
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
