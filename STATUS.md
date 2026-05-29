@@ -1,13 +1,14 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-04-14 06:54 CST
-> Watchdog: atlas-watchdog-5m cron — tick 2026-04-14T2254Z
+> Last updated: 2026-05-29 08:42 CST (tick 2026-05-29T0842Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-05-29T0842Z
 
 ## Head
-`e4cfa28` ("chore(atlas): update .atlas-last-commit to f75919f") — 2026-04-13T1150Z on `main` (synced to origin)
+`4253ffb` ("docs(atlas): watchdog 2026-04-14T2254Z") — local HEAD is `e4cfa28`, behind origin by 1 watchdog sync commit; origin `4253ffb` is clean
 
 ## Commits since last watchdog check
-- `e4cfa28` / `f75919f`: another instance pushed sync commit (2026-04-13 11:50 UTC); HEAD advanced cleanly, no development commits
+- `4253ffb` (origin/main): prior watchdog tick sync commit — no new development commits
+- local HEAD `e4cfa28` is behind origin by 1 commit (watchdog sync); local is clean, no uncommitted changes
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
@@ -21,9 +22,8 @@
 - `docs/tech-lead-sprint2-source-of-truth-2026-03-12.md` is the current single source of truth
 
 ## Server Status
-- ✅ **atlas-server is healthy** — PID 20648 still on :3100; server responded `{"code":0,"message":"ok"}` on health check
+- ✅ **atlas-server is healthy** — PID 1203 (new PID; previously 20648, server restarted at some point since last tick); responding `{"code":0,"message":"ok"}` on health check
 - Docker services (PostgreSQL :5432, Redis :6379, http-alt :8080) — assumed up (daemon running)
-- Head `16c521c` confirmed clean; PID restart captured at this tick
 
 ## Reference Docs
 - `docs/sprint2-wecom-kickoff.md` — Sprint 2 scope and kickoff plan
