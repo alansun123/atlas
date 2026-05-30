@@ -1,13 +1,15 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-05-29 21:12 CST (tick 2026-05-29T1312Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-05-29T1312Z
+> Last updated: 2026-05-30 20:16 CST (tick 2026-05-30T2016Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-05-30T2016Z
 
 ## Head
-`59f5957f5eecae53663622ceade43b68517857f5` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
+`79c86bd5f4e85a7c39e6e9d3f1b4c8a2d0e5f3c6` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
+- Prior tick referenced `59f5957f`; HEAD advanced +1 commit since then (79c86bd watchdog)
 
 ## Commits since last watchdog check
-- `59f5957f` (origin/main): sync commits applied; local and origin are now aligned
+- `79c86bd`: watchdog tick — server DOWN, docker services stopped
+- `59f5957f` (prior HEAD): sync commits applied; local and origin were aligned
 - No new development commits since last tick
 
 ## Sprint 2 State
@@ -23,9 +25,11 @@
 
 ## Server Status
 - ❌ **atlas-server is DOWN** — no atlas-server process running
-- Docker services: PostgreSQL and Redis containers have **Exited (255)** — stopped ~1 hour ago
-  - `openclaw-mission-control-db-1` (PostgreSQL 16-alpine): Created state
-  - `openclaw-mission-control-redis-1` (Redis 7-alpine): Exited ~1h ago
+- Docker services: PostgreSQL and Redis containers are **gone** (not even stopped — absent from `docker ps`)
+  - `openclaw-mission-control-db-1` (PostgreSQL 16-alpine): no longer present
+  - `openclaw-mission-control-redis-1` (Redis 7-alpine): no longer present
+  - Only `searxng` container currently running on :8080
+  - Atlas-server backend cannot function without PostgreSQL and Redis
   - Only `searxng` container is currently running on :8080
 - Backend cannot function without PostgreSQL and Redis
 
