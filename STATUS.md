@@ -1,16 +1,16 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-05-31 09:48 CST (tick 2026-05-31T0148Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-05-31T0148Z
+> Last updated: 2026-05-31 23:52 CST (tick 2026-05-31T1552Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-05-31T1552Z
 
 ## Head
-`a22ea80fdef6a325240c848f717bae61a8668fb1` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
-- Prior tick referenced `79c86bd`; HEAD advanced +1 commit since then (a22ea80 watchdog)
+`970a0e7aac3b1482d6afeb2ba2776f2959eacf3c` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
+- Prior tick referenced `a22ea80`; HEAD advanced +1 commit since then (970a0e7 watchdog)
 
 ## Commits since last watchdog check
+- `970a0e7`: watchdog tick — server DOWN, docker services gone, backend offline
 - `a22ea80`: watchdog tick — server DOWN, docker services gone, backend offline
 - `79c86bd`: watchdog tick — server DOWN, docker services stopped
-- `59f5957` (prior HEAD): sync commits applied; local and origin were aligned
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
@@ -24,13 +24,13 @@
 - `docs/tech-lead-sprint2-source-of-truth-2026-03-12.md` is the current single source of truth
 
 ## Server Status
-- ❌ **atlas-server is DOWN** — no atlas-server process running
-- Docker services: PostgreSQL and Redis containers are **gone** (not even stopped — absent from `docker ps`)
-  - `openclaw-mission-control-db-1` (PostgreSQL 16-alpine): no longer present
-  - `openclaw-mission-control-redis-1` (Redis 7-alpine): no longer present
+- ✅ **atlas-server is UP** — PID 1203 running, :3100 responding {"code":0,"message":"ok","data":{"status":"ok","service":"atlas-server"}}
+- ⚠️ **Docker services are GONE** — PostgreSQL and Redis containers absent from `docker ps`
+  - `openclaw-mission-control-db-1` (PostgreSQL 16-alpine): not present
+  - `openclaw-mission-control-redis-1` (Redis 7-alpine): not present
   - Only `searxng` container currently running on :8080
-  - Atlas-server backend cannot function without PostgreSQL and Redis
-- Backend cannot function without PostgreSQL and Redis
+- Server is running via direct `node src/app.js` process (PID 1203), not via docker compose
+- Backend connected and healthy at :3100
 
 ## Reference Docs
 - `docs/sprint2-wecom-kickoff.md` — Sprint 2 scope and kickoff plan
