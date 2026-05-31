@@ -1,16 +1,16 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-05-30 20:16 CST (tick 2026-05-30T2016Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-05-30T2016Z
+> Last updated: 2026-05-31 09:48 CST (tick 2026-05-31T0148Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-05-31T0148Z
 
 ## Head
-`79c86bd5f4e85a7c39e6e9d3f1b4c8a2d0e5f3c6` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
-- Prior tick referenced `59f5957f`; HEAD advanced +1 commit since then (79c86bd watchdog)
+`a22ea80fdef6a325240c848f717bae61a8668fb1` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
+- Prior tick referenced `79c86bd`; HEAD advanced +1 commit since then (a22ea80 watchdog)
 
 ## Commits since last watchdog check
+- `a22ea80`: watchdog tick — server DOWN, docker services gone, backend offline
 - `79c86bd`: watchdog tick — server DOWN, docker services stopped
-- `59f5957f` (prior HEAD): sync commits applied; local and origin were aligned
-- No new development commits since last tick
+- `59f5957` (prior HEAD): sync commits applied; local and origin were aligned
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
@@ -30,7 +30,6 @@
   - `openclaw-mission-control-redis-1` (Redis 7-alpine): no longer present
   - Only `searxng` container currently running on :8080
   - Atlas-server backend cannot function without PostgreSQL and Redis
-  - Only `searxng` container is currently running on :8080
 - Backend cannot function without PostgreSQL and Redis
 
 ## Reference Docs
