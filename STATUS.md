@@ -1,14 +1,14 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-05-31 23:52 CST (tick 2026-05-31T1552Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-05-31T1552Z
+> Last updated: 2026-06-01 02:52 CST (tick 2026-05-31T1852Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-05-31T1852Z
 
 ## Head
-`970a0e7aac3b1482d6afeb2ba2776f2959eacf3c` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
-- Prior tick referenced `a22ea80`; HEAD advanced +1 commit since then (970a0e7 watchdog)
+`ba0dec57e1cfab2b3e6bdac1f5bd2929854507fa` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
+- Prior tick referenced `970a0e7`; HEAD advanced +1 commit since then (ba0dec5 watchdog)
 
 ## Commits since last watchdog check
-- `970a0e7`: watchdog tick — server DOWN, docker services gone, backend offline
+- `ba0dec5`: watchdog tick — server UP, docker services still gone but backend healthy
 - `a22ea80`: watchdog tick — server DOWN, docker services gone, backend offline
 - `79c86bd`: watchdog tick — server DOWN, docker services stopped
 
@@ -29,8 +29,8 @@
   - `openclaw-mission-control-db-1` (PostgreSQL 16-alpine): not present
   - `openclaw-mission-control-redis-1` (Redis 7-alpine): not present
   - Only `searxng` container currently running on :8080
-- Server is running via direct `node src/app.js` process (PID 1203), not via docker compose
-- Backend connected and healthy at :3100
+- Backend is mock-mvp-auth-signed backend running via `node src/app.js` (PID 1203), not via docker compose
+- Backend is healthy at :3100
 
 ## Reference Docs
 - `docs/sprint2-wecom-kickoff.md` — Sprint 2 scope and kickoff plan
