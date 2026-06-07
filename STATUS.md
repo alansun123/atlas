@@ -1,11 +1,11 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-06-08 00:56 CST (tick 2026-06-07T1656Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-06-07T1656Z
+> Last updated: 2026-06-08 02:56 CST (tick 2026-06-07T1856Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-06-07T1856Z
 
 ## Head
-`b0d0d7f9d6638a2c6320e577da9501e6e598c22d` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
-- Prior tick referenced `ec96956`; HEAD advanced +1 commit since then (b0d0d7 watchdog self-commit)
+`c191880b0a1da8f5e3c69a3d2b7f8e1c4a9d6b3e` — local HEAD and origin/main are in sync; local is clean, no uncommitted changes
+- Prior tick referenced `b0d0d7f`; HEAD advanced +1 commit since then (c191880 watchdog self-commit)
 
 ## Commits since last watchdog check
 - `b0d0d7f`: watchdog tick — server UP, health route /health, docker services still gone
