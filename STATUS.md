@@ -1,15 +1,15 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-06-12 21:36 CST (tick 2026-06-12T1336Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-06-12T1336Z
+> Last updated: 2026-06-17 00:23 CST (tick 2026-06-16T1623Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-06-16T1623Z
 
 ## Head
-`e8e01edbe05de3f3a7b99d1a7f60dd89c2bfb4f7` — local HEAD and origin/main are in sync; local has untracked runtime dirs (.atlas/, atlas-server/data/, atlas-server/logs/, status/)
+`397ca3a4bc863880d8ab91cecbe2a5af0308aae2` — local HEAD and origin/main are in sync; local has untracked runtime dirs (.atlas/, atlas-server/data/, atlas-server/logs/, status/)
 - Prior tick (2026-06-11T0142Z) referenced `4d20a98`; HEAD advanced +1 self-commit since then (`52cbef7` watchdog timestamp refresh)
 
 ## Commits since last watchdog check
+- `397ca3a`: docs(atlas): watchdog 2026-06-12T1336Z — server UP, health route /health, docker services still gone
 - `e8e01ed`: docs(atlas): watchdog 2026-06-12T1306Z — server UP, health route /health, docker services still gone
-- `52cbef7`: docs(atlas): watchdog 2026-06-11T0142Z — server UP, health route /health, docker services still gone
 
 ## Sprint 2 State
 - Sprint 2 P0 is two-part: (1) real WeCom auth acceptance, (2) frontend fallback-risk tightening in real-login mode
