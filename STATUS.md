@@ -1,14 +1,15 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-06-19 06:34 CST (tick 2026-06-18T2234Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-06-18T2234Z
+> Last updated: 2026-06-20 08:34 CST (tick 2026-06-20T0034Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-06-20T0034Z
 
 ## Head
-`28f9b76bea537c04abc440496e961475e432ce6e` — local main and origin/main in sync; STATUS.md head was stale (`3decd38` from prior tick), corrected in-place
-- Prior tick (2026-06-18T1804Z) referenced `3decd38`; that was a sync commit that itself updated STATUS.md but used stale ref; actual HEAD was always `28f9b76`
+`38fa5751d26c66fa1e1086e8a95247eadc6b2333` — local main and origin/main in sync
+- Prior tick (2026-06-18T2234Z) committed correction: prior STATUS.md had `28f9b76` as stale ref; actual HEAD at that tick was `38fa575`
 - Local has untracked runtime dirs: .atlas/, atlas-server/data/, atlas-server/logs/, status/
 
 ## Commits since last watchdog check
+- `38fa575`: docs(atlas): watchdog 2026-06-18T2234Z — correct HEAD ref (3decd38→28f9b76), state unchanged
 - `28f9b76`: docs(atlas): watchdog 2026-06-18T1804Z — sync HEAD to 3decd38, state unchanged
 - `3decd38`: docs(atlas): watchdog 2026-06-18T1734Z — sync HEAD to 0d47730, server still UP, docker services still gone
 - `0d47730`: docs(atlas): watchdog 2026-06-17T1928Z — sync HEAD to 31aa7cf, state unchanged
