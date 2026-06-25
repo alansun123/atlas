@@ -1,11 +1,11 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-06-25 23:20 CST (tick 2026-06-25T1520Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-06-25T1520Z
+> Last updated: 2026-06-26 05:23 CST (tick 2026-06-25T2123Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-06-25T2123Z
 
 ## Head
-`5420e65e44dda7e9147a4ea126d28f6867b53a9b` — local main and origin/main in sync
-- Prior tick (2026-06-25T1350Z) pushed `5420e65` to origin; STATUS.md incorrectly captured prior tick's target ref (`faaf551`) rather than its own commit
+`3ba030dc97c7927dd80efde9918f0e7c95f0d663` — local main and origin/main in sync
+- Prior tick (2026-06-25T1520Z) pushed `3ba030d` correcting stale HEAD ref (faaf551→5420e65→3ba030d self-correction)
 - Local has untracked runtime dirs: .atlas/, atlas-server/data/, atlas-server/logs/, status/
 
 ## Commits since last watchdog check
