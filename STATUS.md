@@ -1,14 +1,15 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-06-30 19:38 CST (tick 2026-06-30T1138Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-06-30T1138Z
+> Last updated: 2026-07-01 23:10 CST (tick 2026-07-01T1510Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-07-01T1510Z
 
 ## Head
-`013ec4147905c38303321815b22e85c3496152bb` — local main and origin/main in sync
-- Prior tick self-correcting HEAD ref (a243948→b0ab3bc→013ec41); local and origin in sync, state unchanged, Sprint2 still blocked on WeCom handoff
+`a40b4944300823b786a0df95e8895f826bfc757b` — local main and origin/main in sync
+- Prior tick: committed STATUS.md showed stale HEAD ref (013ec41→a40b494); correcting now; state unchanged, Sprint2 still blocked on WeCom handoff
 - Local has untracked runtime dirs: .atlas/, atlas-server/data/, atlas-server/logs/, status/
 
 ## Commits since last watchdog check
+- `a40b494`: docs(atlas): watchdog 2026-06-30T1138Z — correct stale HEAD ref (b0ab3bc→013ec41), state unchanged, Sprint2 still blocked on WeCom handoff
 - `a243948`: docs(atlas): watchdog 2026-06-27T2326Z — self-correct HEAD ref (fc90f73→42e6035), state unchanged, Sprint2 still blocked on WeCom handoff
 - `42e6035`: docs(atlas): watchdog 2026-06-27T2226Z — correct stale HEAD ref (aca1b66→fc90f73), state unchanged, Sprint2 still blocked on WeCom handoff
 - `fc90f73`: docs(atlas): watchdog 2026-06-27T1556Z — correct stale HEAD ref (019093c→aca1b6), state unchanged, Sprint2 still blocked on WeCom handoff
