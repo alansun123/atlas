@@ -4,7 +4,7 @@
 > Watchdog: atlas-watchdog-5m cron — tick 2026-07-08T0155Z
 
 ## Head
-`4af7edf5e8f37038af138f7e2363c6106db67c17` — origin/main synced; server up, docker absent, Sprint2 still blocked on WeCom handoff
+`b576cd6a3ee1bc6e57637a6798f5792f46d97206` — origin/main synced; server up, docker absent, Sprint2 still blocked on WeCom handoff
 - Prior tick (2026-07-07T1224Z): HEAD was 4776144; this tick HEAD moved to 4af7edf (local was behind origin/main by 1); STATUS.md corrected to current HEAD ref
 - Prior tick (2026-07-07T1224Z): HEAD was 4776144; this tick HEAD moved to 4af7edf (local was 1 behind origin/main); STATUS.md corrected to current HEAD ref
 - Local has untracked runtime dirs: .atlas/, atlas-server/data/, atlas-server/logs/, status/
