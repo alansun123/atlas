@@ -1,11 +1,11 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-07-10 15:04 CST (tick 2026-07-10T0704Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-07-10T0704Z
+> Last updated: 2026-07-11 15:35 CST (tick 2026-07-11T0735Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-07-11T0735Z
 
 ## Head
-`115c0114d3da15f7674dd5c879fe046fcec63903` — origin/main synced; server up, docker absent, Sprint2 still blocked on WeCom handoff
-- Prior tick (2026-07-08T1426Z): HEAD was 3bfaaa9; this tick HEAD moved to 115c011 (prior watchdog self-correction commit), STATUS.md HEAD ref corrected from stale 3bfaaa9→115c011; state otherwise unchanged
+`e7adffd54b7d2c66e29bf5b57503c38e2d8dddbd` — origin/main synced; server up, docker absent, Sprint2 still blocked on WeCom handoff
+- Prior tick (2026-07-10T0704Z): HEAD was 115c011; this tick found HEAD at e7adffd (watchdog's own prior self-correction commit); STATUS.md HEAD ref corrected from stale 115c011→e7adffd; state otherwise unchanged
 - Local has untracked runtime dirs: .atlas/, atlas-server/data/, atlas-server/logs/, status/
 
 ## Commits since last watchdog check
