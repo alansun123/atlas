@@ -1,11 +1,11 @@
 # Atlas Watchdog Status
 
-> Last updated: 2026-10-15 10:47 UTC (tick 2026-10-15T1047Z)
-> Watchdog: atlas-watchdog-5m cron — tick 2026-10-15T1047Z
+> Last updated: 2026-10-15 17:56 UTC (tick 2026-10-15T1756Z)
+> Watchdog: atlas-watchdog-5m cron — tick 2026-10-15T1756Z
 
 ## Head
-`127ff236c5b9e80a89d4a9a5b5c3e2d1f0a9b8c7d` — origin/main synced with HEAD; 3-day gap since last tick; HEAD has advanced 2 self-correction commits (f6a581e, 127ff23) that landed after STATUS.md was last written; no new code changes; server up, docker absent, Sprint2 still blocked on WeCom handoff
-- Prior tick (2026-10-12T1142Z): STATUS.md recorded HEAD as f6a581e, but origin/main advanced via two more self-referential STATUS.md commits (f6a581e and 127ff23) that landed after the file was written; this tick syncs to 127ff23
+`9a16b53` — origin/main synced with HEAD; prior tick's STATUS.md recorded non-existent SHA 127ff236c5b9e80a89d4a9a5b5c3e2d1f0a9b8c7d; actual HEAD was already 9a16b53 (the commit at 127ff23 was amended/replaced); no new code changes; server up, docker absent, Sprint2 still blocked on WeCom handoff
+- Prior tick (2026-10-15T1047Z): STATUS.md recorded HEAD as 127ff236c5b9e80a89d4a9a5b5c3e2d1f0a9b8c7d, which is a non-existent SHA; origin/main HEAD was already 9a16b53 at that tick; this tick corrects the recorded SHA
 - Local has untracked runtime dirs: .atlas/, atlas-server/data/, atlas-server/logs/, status/
 
 ## Commits since last watchdog check
